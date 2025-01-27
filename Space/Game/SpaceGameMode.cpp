@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SpaceGameMode.h"
+
+#include "GravityController.h"
 #include "Space/Characters/SpaceCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -12,4 +14,6 @@ ASpaceGameMode::ASpaceGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
+	PlayerControllerClass = AGravityController::StaticClass();
 }

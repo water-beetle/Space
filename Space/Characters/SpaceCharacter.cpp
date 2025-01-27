@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Space/Game/GravityController.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -60,6 +61,14 @@ void ASpaceCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ASpaceCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	GravityDir = (FVector::Zero() - GetActorLocation()).GetSafeNormal();
+	GetCharacterMovement()->SetGravityDirection(GravityDir);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -101,14 +110,19 @@ void ASpaceCharacter::Move(const FInputActionValue& Value)
 	if (Controller != nullptr)
 	{
 		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator Rotation = Cast<AGravityController>(Controller)->GetGravityRelativeRotation(Controller->GetControlRotation(), GravityDir);
+
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FRotator YawRollRotation(0, Rotation.Yaw, Rotation.Roll);
+
+		const FRotator ForwardRotation = Cast<AGravityController>(Controller)->GetGravityWorldRotation(YawRotation, GravityDir);
+		const FRotator RightRotation = Cast<AGravityController>(Controller)->GetGravityWorldRotation(YawRollRotation, GravityDir);
 
 		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector ForwardDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
 	
 		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		const FVector RightDirection = FRotationMatrix(RightRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
