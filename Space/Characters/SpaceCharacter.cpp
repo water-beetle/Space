@@ -9,6 +9,7 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GravityBody.h"
 #include "InputActionValue.h"
 #include "Space/Game/GravityController.h"
 
@@ -53,6 +54,10 @@ ASpaceCharacter::ASpaceCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	GravityBody = CreateDefaultSubobject<UGravityBody>(TEXT("GravityBody"));
+
+	GetCharacterMovement()->GravityScale = .0f;
 }
 
 void ASpaceCharacter::BeginPlay()
@@ -65,7 +70,12 @@ void ASpaceCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	GravityDir = (FVector::Zero() - GetActorLocation()).GetSafeNormal();
+	FVector TargetGravityDir = GravityBody->GetGravityDirection();
+
+	// 현재 중력 방향에서 목표 중력 방향으로 점진적으로 보간
+	const float GravityChangeSpeed = 2.0f; // 중력 방향 변화 속도 (값이 클수록 빠르게 반응)
+	GravityDir = FMath::VInterpTo(GravityDir, TargetGravityDir, DeltaSeconds, GravityChangeSpeed);
+	
 	GetCharacterMovement()->SetGravityDirection(GravityDir);
 }
 

@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "SpaceCharacter.generated.h"
 
+class UGravityBody;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -20,6 +21,9 @@ class ASpaceCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
+	UGravityBody* GravityBody;
+	
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -70,6 +74,7 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE class UGravityBody* GetGravityBody() const {return GravityBody;}
 
 private:
 	FVector GravityDir;

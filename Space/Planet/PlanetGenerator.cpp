@@ -2,6 +2,8 @@
 
 
 #include "PlanetGenerator.h"
+
+#include "GravityFieldCenter.h"
 #include "ProceduralMeshComponent.h"
 
 // Sets default values
@@ -15,6 +17,9 @@ APlanetGenerator::APlanetGenerator()
 
 	OceanMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OceanMesh"));
 	OceanMesh->SetupAttachment(RootComponent);
+
+	GravityField = CreateDefaultSubobject<UGravityFieldCenter>("GravityField");
+	GravityField->SetupAttachment(RootComponent);
 
 	PlanetRadius = 100;
 	PlanetResolution = 100;
@@ -65,12 +70,18 @@ void APlanetGenerator::GeneratePlanet(int32 Resolution, float Radius)
 	// Procedural Mesh 생성
 	PlanetMesh->CreateMeshSection(0, Vertices, Triangles, Normals, UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 
-	GenerateOcean();
+	if(bCreateOcean)
+	{
+		GenerateOcean();
+	}
 	
 	if (PlanetMaterial)
 	{
 		PlanetMesh->SetMaterial(0, PlanetMaterial);
 	}
+
+	// 중력장 범위 설정
+	GravityField->SetGravityFieldSize(MaxRadius + Radius * 0.4 + 100);
 }
 
 void APlanetGenerator::GenerateOcean()
@@ -82,6 +93,8 @@ void APlanetGenerator::GenerateOcean()
 	{
 		OceanMesh->SetStaticMesh(SphereMesh);
 
+		WaterRadius = FMath::Lerp(MinRadius, MaxRadius, 0.4);
+		
 		// 바다 반경 설정
 		FVector Scale = FVector(WaterRadius / 50.0f); // 구체 기본 크기(반경 50) 기준으로 스케일 조정
 		OceanMesh->SetWorldScale3D(Scale);
@@ -114,6 +127,11 @@ void APlanetGenerator::GenerateFace(const FVector& LocalUp, int32 Resolution, fl
 
         	float Height = NoiseGenerator.GetHeight(PointOnSphere); // 노이즈 적용
         	FVector AdjustedPoint = PointOnSphere * (Height + 1) * Radius;
+
+        	// 행성의 Min, Max Radius 업데이트
+        	float CalculatedRadius = (Height + 1) * Radius;
+        	MinRadius = FMath::Min(MinRadius, CalculatedRadius);
+        	MaxRadius = FMath::Max(MaxRadius, CalculatedRadius);
 
             // 정점 추가
             Vertices.Add(AdjustedPoint);

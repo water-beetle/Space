@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "PlanetGenerator.generated.h"
 
+class UGravityFieldCenter;
 class UProceduralMeshComponent;
 
 UCLASS()
@@ -43,16 +44,24 @@ public:
 	float WaterRadius;
 
 	UPROPERTY(EditAnywhere, Category = "Planet Settings")
-	bool bDrawDebugPoint = false;	
+	bool bDrawDebugPoint = false;
+	UPROPERTY(EditAnywhere, Category = "Planet Settings")
+	bool bCreateOcean = false;	
 
 	UPROPERTY(EditAnywhere, Category = "Planet Settings")
 	FPlanetNoiseGenerator NoiseGenerator;
+
+	UPROPERTY(EditAnywhere, Category = "Planet Settings")
+	UGravityFieldCenter* GravityField;
 
 private:
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* PlanetMesh;
 	UPROPERTY(VisibleAnywhere, Category = "Procedural Mesh")
 	UStaticMeshComponent* OceanMesh;
+
+	float MinRadius = FLT_MAX;
+	float MaxRadius = FLT_MIN;
 
 	void GeneratePlanet(int32 Resolution, float Radius);
 	void GenerateOcean();	
