@@ -7,8 +7,10 @@
 #include "GameFramework/Actor.h"
 #include "PlanetGenerator.generated.h"
 
+class UPlanetOrbit;
 class UGravityFieldCenter;
 class UProceduralMeshComponent;
+class USplineComponent;
 
 UCLASS()
 class SPACE_API APlanetGenerator : public AActor
@@ -16,12 +18,13 @@ class SPACE_API APlanetGenerator : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
+	// Sets default values for this actor's properties	
 	APlanetGenerator();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 public:	
 
@@ -29,6 +32,13 @@ public:
 	UFUNCTION(CallInEditor, Category = "Planet Settings")
 	void GeneratePlanetInEditor();
 
+	UPROPERTY(VisibleInstanceOnly)
+	UProceduralMeshComponent* PlanetMesh;
+	UPROPERTY(VisibleInstanceOnly)
+	UStaticMeshComponent* OceanMesh;
+	UPROPERTY(VisibleInstanceOnly)
+	UProceduralMeshComponent* OrbitMesh;
+	
 	UPROPERTY(EditAnywhere, Category = "Planet Settings")
 	UMaterialInterface* PlanetMaterial;
 	UPROPERTY(EditAnywhere, Category = "Planet Settings")
@@ -46,21 +56,15 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Planet Settings")
 	bool bCreateOcean = false;	
 
-	UPROPERTY(EditAnywhere, Category = "Planet Settings")
-	FPlanetNoiseGenerator NoiseGenerator;
-
+private:
 	UPROPERTY(EditAnywhere, Category = "Planet Settings")
 	UGravityFieldCenter* GravityField;
-
-private:
-	UPROPERTY(VisibleAnywhere)
-	UProceduralMeshComponent* PlanetMesh;
-	UPROPERTY(VisibleAnywhere, Category = "Procedural Mesh")
-	UStaticMeshComponent* OceanMesh;
-
-	float MinRadius = FLT_MAX;
-	float MaxRadius = FLT_MIN;
-
+	UPROPERTY(EditAnywhere, Category = "Planet Noise Settings")
+	FPlanetNoiseGenerator NoiseGenerator;
+	UPROPERTY(EditAnywhere, Category = "Planet Orbit Settings")
+	UPlanetOrbit* PlanetOrbit;
+	
+	
 	void GeneratePlanet(int32 Resolution, float Radius);
 	void GenerateOcean();	
 	void GenerateFace(const FVector& LocalUp, int32 Resolution, float Radius, TArray<FVector>& Vertices,
@@ -70,5 +74,7 @@ private:
 	FVector2D CalculateUV(const FVector2D& GridPosition,int32 Resolution);
 	FVector CalculateNormal(const FVector& Vertex);
 	
+	float MinRadius = FLT_MAX;
+	float MaxRadius = FLT_MIN;
 	
 };

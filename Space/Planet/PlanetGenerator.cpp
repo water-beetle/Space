@@ -4,13 +4,14 @@
 #include "PlanetGenerator.h"
 
 #include "GravityFieldCenter.h"
+#include "PlanetOrbit.h"
 #include "ProceduralMeshComponent.h"
 
 // Sets default values
 APlanetGenerator::APlanetGenerator()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	PlanetMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("PlanetMesh"));
 	RootComponent = PlanetMesh;
@@ -18,8 +19,19 @@ APlanetGenerator::APlanetGenerator()
 	OceanMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OceanMesh"));
 	OceanMesh->SetupAttachment(RootComponent);
 
+	OrbitMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("OrbitMesh"));
+	OrbitMesh->SetupAttachment(RootComponent);
+	// 공전 궤도를 나타내기 행성의 위치, 각도에 무관하게 적용
+	OrbitMesh->SetUsingAbsoluteRotation(true);
+	OrbitMesh->SetUsingAbsoluteLocation(true);
+	OrbitMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	OrbitMesh->CastShadow = false;
+	
 	GravityField = CreateDefaultSubobject<UGravityFieldCenter>("GravityField");
 	GravityField->SetupAttachment(RootComponent);
+
+	PlanetOrbit = CreateDefaultSubobject<UPlanetOrbit>("PlanetOrbit");
+	
 
 	PlanetRadius = 100;
 	PlanetResolution = 100;
@@ -30,8 +42,14 @@ APlanetGenerator::APlanetGenerator()
 void APlanetGenerator::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	GeneratePlanet(PlanetResolution, PlanetRadius);
+	PlanetOrbit->SetOrbitVisualization(OrbitMesh);
+}
+
+void APlanetGenerator::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
 }
 
 void APlanetGenerator::GeneratePlanetInEditor()
