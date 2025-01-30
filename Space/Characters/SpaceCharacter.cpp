@@ -70,11 +70,11 @@ void ASpaceCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	FVector TargetGravityDir = GravityBody->GetGravityDirection();
+	FVector TargetGravityDir = GravityBody->GetGravityDirection().GetSafeNormal();
 
 	// 현재 중력 방향에서 목표 중력 방향으로 점진적으로 보간
 	const float GravityChangeSpeed = 2.0f; // 중력 방향 변화 속도 (값이 클수록 빠르게 반응)
-	GravityDir = FMath::VInterpTo(GravityDir, TargetGravityDir, DeltaSeconds, GravityChangeSpeed);
+	GravityDir = FMath::VInterpTo(GravityDir, TargetGravityDir, DeltaSeconds, GravityChangeSpeed).GetSafeNormal();
 	
 	GetCharacterMovement()->SetGravityDirection(GravityDir);
 }

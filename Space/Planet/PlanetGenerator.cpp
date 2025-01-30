@@ -10,7 +10,7 @@
 APlanetGenerator::APlanetGenerator()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	PlanetMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("PlanetMesh"));
 	RootComponent = PlanetMesh;
@@ -32,13 +32,6 @@ void APlanetGenerator::BeginPlay()
 	Super::BeginPlay();
 
 	GeneratePlanet(PlanetResolution, PlanetRadius);
-}
-
-// Called every frame
-void APlanetGenerator::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 void APlanetGenerator::GeneratePlanetInEditor()

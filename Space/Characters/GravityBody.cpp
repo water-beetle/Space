@@ -26,15 +26,6 @@ void UGravityBody::BeginPlay()
 	
 }
 
-
-// Called every frame
-void UGravityBody::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-
 void UGravityBody::AddGravityArea(UGravityField* GravityField)
 {
 	GravityFields.Add(GravityField);

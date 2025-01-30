@@ -24,8 +24,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	// 에디터에서 호출되는 함수
 	UFUNCTION(CallInEditor, Category = "Planet Settings")
