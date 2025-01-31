@@ -3,6 +3,8 @@
 
 #include "PlanetOrbit.h"
 
+#include "Space/Data/PlanetData.h"
+
 
 // Sets default values for this component's properties
 UPlanetOrbit::UPlanetOrbit()
@@ -35,8 +37,6 @@ UPlanetOrbit::UPlanetOrbit()
 void UPlanetOrbit::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	InitPlanetPosition(); // 공전 궤도에 따른 행성 좌표 초기화
 }
 
 
@@ -49,8 +49,23 @@ void UPlanetOrbit::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	PlanetRotation(DeltaTime);
 }
 
-void UPlanetOrbit::InitPlanetPosition()
+void UPlanetOrbit::InitOrbit(const FOrbitData& OrbitData, const FVector _OrbitCenter)
 {
+	OrbitRadiusX = OrbitData.OrbitRadiusX;
+	OrbitRadiusY = OrbitData.OrbitRadiusY;
+	OrbitSpeed = OrbitData.OrbitSpeed;
+	OrbitIncline = OrbitData.OrbitIncline;
+	RotationSpeed = OrbitData.RotationSpeed;
+	SegmentCount = OrbitData.SegmentCount;
+	Thickness = OrbitData.Thickness;
+	OrbitCenter = _OrbitCenter;
+
+	// 공전 각속도 설정
+	float EllipseCircumference = CalculateEllipseCircumference(OrbitRadiusX, OrbitRadiusY);
+	float RotateSpeed = EllipseCircumference / OrbitSpeed;
+	AngularSpeed = 360.0f / RotateSpeed;
+	
+	
 	// 랜덤 각도 생성 (0 ~ 360°)
 	CurrentOrbitTheta = FMath::FRandRange(0.0f, 360.0f);
 
@@ -177,7 +192,7 @@ void UPlanetOrbit::GenerateEllipseMesh(UProceduralMeshComponent* OrbitMesh)
 
 void UPlanetOrbit::PlanetRevolve(float DeltaTime)
 {
-	CurrentOrbitTheta += OrbitSpeed * DeltaTime;
+	CurrentOrbitTheta += AngularSpeed * DeltaTime;
 	if (CurrentOrbitTheta >= 360.0f) CurrentOrbitTheta -= 360.0f;
 
 	FVector OrbitPoint = CalculateOrbitPointsByTheta(CurrentOrbitTheta, OrbitRadiusX, OrbitRadiusY) + OrbitCenter;
@@ -208,5 +223,11 @@ FVector UPlanetOrbit::CalculateOrbitPointsByTheta(float Theta, float RadiusX, fl
 
 	// 궤도 기울기 적용
 	return OrbitIncline.RotateVector(NewPosition);
+}
+
+float UPlanetOrbit::CalculateEllipseCircumference(float RadiusX, float RadiusY) const
+{
+	// 타원 둘레 근사
+	return PI * (3 * (RadiusX + RadiusY) - FMath::Sqrt((3 * RadiusX + RadiusY) * (RadiusX + 3 * RadiusY)));
 }
 

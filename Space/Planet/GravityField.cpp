@@ -23,7 +23,8 @@ void UGravityField::BeginPlay()
 	Super::BeginPlay();
 
 	SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	SetCollisionResponseToAllChannels(ECR_Overlap);
+	SetCollisionResponseToAllChannels(ECR_Ignore);
+	SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	
 	// BeginPlay에서 Overlap된 Actor 찾으려니까 안찾아짐
 	// BeginPlay 이후 0.1초 지연 후 초기화 함수 호출

@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SunGenerator.h"
+#include "Sun.h"
 
 #include "Engine/DirectionalLight.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 
-ASunGenerator::ASunGenerator()
+ASun::ASun()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
@@ -18,7 +18,7 @@ ASunGenerator::ASunGenerator()
 	}
 }
 
-void ASunGenerator::BeginPlay()
+void ASun::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -29,14 +29,14 @@ void ASunGenerator::BeginPlay()
 	MPCInstance = GetWorld()->GetParameterCollectionInstance(SunDirectionMPC);
 }
 
-void ASunGenerator::Tick(float DeltaSeconds)
+void ASun::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
 	UpdateSunDirection();
 }
 
-void ASunGenerator::UpdateSunDirection()
+void ASun::UpdateSunDirection()
 {
 	if(!PlayerPawn || !SunLight)
 		return;

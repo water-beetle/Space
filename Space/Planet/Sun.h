@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Space/Planet/PlanetGenerator.h"
-#include "SunGenerator.generated.h"
+#include "Space/Planet/Planet.h"
+#include "Sun.generated.h"
 
 class ADirectionalLight;
 class UMaterialParameterCollectionInstance;
@@ -12,12 +12,12 @@ class UMaterialParameterCollectionInstance;
  * 
  */
 UCLASS()
-class SPACE_API ASunGenerator : public APlanetGenerator
+class SPACE_API ASun : public APlanet
 {
 	GENERATED_BODY()
 
 public:
-	ASunGenerator();
+	ASun();
 
 protected:
 	virtual void BeginPlay() override;
