@@ -28,8 +28,11 @@ public:
 	UMaterialParameterCollection* SunDirectionMPC;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lighting")
-	ADirectionalLight* SunLight;
+	ADirectionalLight* DirectionalSunLight;
+
+	virtual void InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius) override;
 	
+	FORCEINLINE void SetDiretionalLight(ADirectionalLight* DirectionalLight){DirectionalSunLight = DirectionalLight;}
 private:
 	APawn* PlayerPawn;
 	UMaterialParameterCollectionInstance* MPCInstance;

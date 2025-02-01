@@ -8,6 +8,7 @@
 #include "Space/Data/PlanetData.h"
 #include "SolarSystem.generated.h"
 
+class ADirectionalLight;
 class APlanet;
 class ASun;
 
@@ -41,21 +42,31 @@ protected:
 public:
 	
 	UPROPERTY(EditAnywhere, Category="Solar System")
-	float MinRadius;	
+	float MinOrbitRadius;	
 	UPROPERTY(EditAnywhere, Category="Solar System")
-	float MaxRadius;
+	float MaxOrbitRadius;
 	
 	UPROPERTY(EditAnywhere, Category="Sun")
 	FVector SunPosition;
 	UPROPERTY(EditAnywhere, Category="Sun")
 	float SunRadius;
 	UPROPERTY(EditAnywhere, Category="Sun")
+	int32 SunResolution;
+	UPROPERTY(EditAnywhere, Category="Sun")
 	UMaterialInterface* SunMaterial;
+	UPROPERTY(EditAnywhere, Category="Sun")
+	ADirectionalLight* DirectionalSunLight;
 
 	UPROPERTY(EditAnywhere, Category="Planet")
 	bool bUseNewPlanetMesh;
 	UPROPERTY(EditAnywhere, Category="Planet")
 	int32 PlanetNums;
+	UPROPERTY(EditAnywhere, Category="Planet")
+	int32 PlanetMinRadius;
+	UPROPERTY(EditAnywhere, Category="Planet")
+	int32 PlanetMaxRadius;
+	UPROPERTY(EditAnywhere, Category="Planet")
+	int32 PlanetResolution;
 	UPROPERTY(EditAnywhere, Category = "Planet")
 	TArray<UMaterialInterface*> PlanetMaterialArray;
 	
@@ -67,7 +78,7 @@ private:
 	void GeneratePlanetMesh();
 	void GenerateSun();
 	void GeneratePlanets();
-	
+
 	PlanetMeshGenerator MeshGenerator;
 
 	ASun* Sun;

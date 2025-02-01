@@ -2,7 +2,6 @@
 
 
 #include "SolarSystem.h"
-
 #include "Sun.h"
 
 
@@ -12,15 +11,21 @@ ASolarSystem::ASolarSystem()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	MinRadius = 10000;
-	MaxRadius = 100000;
+	MinOrbitRadius = 10000;
+	MaxOrbitRadius = 100000;
+
+	PlanetMaterialArray = TArray<UMaterialInterface*>();
 	
 	SunPosition = FVector::ZeroVector;
 	SunRadius = 5000;
+	SunResolution = 100;
 	SunNoiseData.SetZero();
 	SunOrbitData.SetZero();
 	
 	PlanetNums = 10;
+	PlanetMinRadius = 1000;
+	PlanetMaxRadius = 5000;
+	PlanetResolution = 100;
 	bUseNewPlanetMesh = false;
 }
 
@@ -28,7 +33,7 @@ ASolarSystem::ASolarSystem()
 void ASolarSystem::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	SetRandomPlanetData();
 	GeneratePlanetMesh();
 	GenerateSun();
@@ -46,8 +51,8 @@ void ASolarSystem::SetRandomPlanetData()
 	for (int i = 0; i < PlanetNums; ++i)
 	{
 		FPlanetData PlanetData;
-		PlanetData.Radius = FMath::RandRange(10000, 15000);
-		PlanetData.OrbitData.SetRandom(MinRadius, MaxRadius);
+		PlanetData.Radius = FMath::RandRange(PlanetMinRadius, PlanetMaxRadius);
+		PlanetData.OrbitData.SetRandom(MinOrbitRadius, MaxOrbitRadius);
 		PlanetDataArray.Add(PlanetData);
 	}
 }
@@ -59,7 +64,7 @@ void ASolarSystem::GeneratePlanetMesh()
 
 	if(!IFileManager::Get().FileExists(*SunPath))
 	{
-		MeshGenerator.GeneratePlanetMesh(PlanetSaveDirectory, "Sun", 100, SunRadius, SunNoiseData);
+		MeshGenerator.GeneratePlanetMesh(PlanetSaveDirectory, "Sun", SunResolution, SunRadius, SunNoiseData);
 	}
 	
 	for (int i = 0; i < PlanetNums; ++i)
@@ -70,7 +75,7 @@ void ASolarSystem::GeneratePlanetMesh()
 		if(bUseNewPlanetMesh || !IFileManager::Get().FileExists(*PlanetPath))
 		{
 			MeshGenerator.GeneratePlanetMesh(PlanetSaveDirectory, PlanetMeshName + FString::FromInt(i),
-				50, 1000, PlanetDataArray[i].NoiseData);
+				PlanetResolution, PlanetDataArray[i].Radius, PlanetDataArray[i].NoiseData);
 		}
 	}
 }
@@ -82,6 +87,7 @@ void ASolarSystem::GenerateSun()
 	
 	Sun = GetWorld()->SpawnActor<ASun>(ASun::StaticClass(), SunPosition, FRotator::ZeroRotator, SpawnParams);
 	Sun->InitPlanet(SunOrbitData, SunPosition, SunRadius);
+	Sun->SetDiretionalLight(DirectionalSunLight);
 	Sun->SetActorLocation(SunPosition);
 	
 	FString SunPath = PlanetSaveDirectory + TEXT("Sun");
@@ -105,12 +111,13 @@ void ASolarSystem::GeneratePlanets()
 		UMaterialInterface* PlanetMaterial = nullptr;
 		if(PlanetMaterialArray.Num() > 0)
 		{
-			PlanetMaterial = PlanetMaterialArray[FMath::RandRange(0, PlanetMaterialArray.Num())];
+			int32 RandomIndex = FMath::RandRange(0, PlanetMaterialArray.Num() - 1);
+			PlanetMaterial = PlanetMaterialArray[RandomIndex];
 		}
 		
 		Planet->SetPlanetMeshAndMaterial(PlanetMesh, PlanetMaterial);
 
 		PlanetDataArray[i].Planet = Planet;
 	}
-} 
+}
 

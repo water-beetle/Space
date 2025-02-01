@@ -21,6 +21,6 @@ void UGravityFieldCenter::BeginPlay()
 
 FVector UGravityFieldCenter::GetGravityDirection(UGravityBody* GravityBody) const
 {
-	return (GetComponentLocation() - GravityBody->GetOwner()->GetActorLocation()).GetSafeNormal();
+	return (GetOwner()->GetActorLocation() - GravityBody->GetOwner()->GetActorLocation()).GetSafeNormal();
 }
 

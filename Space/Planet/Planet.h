@@ -25,6 +25,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	UPROPERTY(VisibleAnywhere, Category = "Planet")
+	UStaticMeshComponent* PlanetMesh;
 public:	
 	UPROPERTY(VisibleAnywhere, Category = "Planet")
 	UGravityFieldCenter* GravityField;
@@ -33,11 +35,10 @@ public:
 	float PlanetRadius;
 
 	void SetPlanetMeshAndMaterial(UStaticMesh* StaticMesh, UMaterialInterface* PlanetMaterial);
-	void InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius);
+	virtual void InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius);
 
+	
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Planet")
-	UStaticMeshComponent* PlanetMesh;
 	UPROPERTY(VisibleAnywhere, Category = "Planet")
 	UProceduralMeshComponent* OrbitMesh;
 	

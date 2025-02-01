@@ -11,6 +11,7 @@
 APlanet::APlanet()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.TickGroup = TG_PostPhysics;
 	PrimaryActorTick.bCanEverTick = true;
 
 	PlanetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlanetMesh"));
@@ -27,7 +28,6 @@ APlanet::APlanet()
 	GravityField->SetupAttachment(RootComponent);
 
 	PlanetOrbitComponent = CreateDefaultSubobject<UPlanetOrbit>("PlanetOrbit");
-	
 	PlanetRadius = 100;
 }
 
@@ -61,8 +61,7 @@ void APlanet::InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter
 	PlanetOrbitComponent->SetOrbitVisualization(OrbitMesh); // 행성의 공전궤도 설정
 
 	// 중력장 범위 설정
-	GravityField->SetGravityFieldSize(Radius * 2 + 100);
-
+	GravityField->SetGravityFieldSize(Radius * 10 + 100);
 	PlanetRadius = Radius;
 }
 

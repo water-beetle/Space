@@ -28,4 +28,5 @@ public:
 
 private:
 	TArray<UGravityField*> GravityFields;
+	UGravityField* CurrentGravityField;
 };

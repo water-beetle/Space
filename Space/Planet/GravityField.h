@@ -31,6 +31,7 @@ public:
 	float GravityScale;
 
 	void SetGravityFieldSize(float Radius);
+	void DelayedInitialize();
 
 private:
 	// 중력 필드 충돌 처리
@@ -42,6 +43,4 @@ private:
 	UFUNCTION()
 	void OnExitGravityArea(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
 						   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	void DelayedInitialize();
 };

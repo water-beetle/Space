@@ -30,11 +30,11 @@ struct FOrbitData
 	{
 		OrbitRadiusX = FMath::RandRange(MinRadius, MaxRadius);
 		OrbitRadiusY = FMath::RandRange(MinRadius, MaxRadius);
-		OrbitIncline.Yaw = FMath::RandRange(0.0f, 360.0f);
-		OrbitIncline.Pitch = FMath::RandRange(-60.0f, 60.0f);
-		OrbitIncline.Roll = FMath::RandRange(0.0f, 360.0f);
-		OrbitSpeed = FMath::RandRange(2, 5);
-		RotationSpeed = FMath::RandRange(5, 15);
+		OrbitIncline.Yaw = FMath::RandRange(-30.0f, 30.0f);
+		OrbitIncline.Pitch = FMath::RandRange(-30.0f, 30.0f);
+		OrbitIncline.Roll = FMath::RandRange(-30.0f, 30.0f);
+		OrbitSpeed = FMath::RandRange(0.5f, 2.f);
+		RotationSpeed = FMath::RandRange(0.5f, 1.5f);
 	}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orbit")

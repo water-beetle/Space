@@ -42,6 +42,7 @@ ASpaceCharacter::ASpaceCharacter()
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
 	GetCharacterMovement()->bIgnoreBaseRotation = true;
+	GetCharacterMovement()->bStayBasedInAir = true; // 
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -122,20 +123,43 @@ void ASpaceCharacter::Move(const FInputActionValue& Value)
 	if (Controller != nullptr)
 	{
 		// find out which way is forward
-		const FRotator Rotation = Cast<AGravityController>(Controller)->GetGravityRelativeRotation(Controller->GetControlRotation(), GravityDir);
+		const FRotator GravityRelativeRot  = Cast<AGravityController>(Controller)->GetGravityRelativeRotation(Controller->GetControlRotation(), GravityDir);
 
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-		const FRotator YawRollRotation(0, Rotation.Yaw, Rotation.Roll);
+		const FRotator YawRotation(0, GravityRelativeRot.Yaw, 0);
+		const FRotator YawRollRotation(0, GravityRelativeRot.Yaw, GravityRelativeRot.Roll);
 
 		const FRotator ForwardRotation = Cast<AGravityController>(Controller)->GetGravityWorldRotation(YawRotation, GravityDir);
 		const FRotator RightRotation = Cast<AGravityController>(Controller)->GetGravityWorldRotation(YawRollRotation, GravityDir);
 
 		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
-	
+		FVector ForwardDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
 		// get right vector 
-		const FVector RightDirection = FRotationMatrix(RightRotation).GetUnitAxis(EAxis::Y);
+		FVector RightDirection = FRotationMatrix(RightRotation).GetUnitAxis(EAxis::Y);
 
+		FVector GravityNormal = GravityDir.GetSafeNormal();
+
+		// 테스트해보니까, Forward 방향의 고각이 계속 올라감
+		// Forward를 중력 방향과 수직이 되도록 보정
+		const float ForwardDot = FVector::DotProduct(ForwardDirection, GravityNormal);
+		ForwardDirection = ForwardDirection - ForwardDot * GravityNormal;
+		ForwardDirection.Normalize();
+
+		// Right도 마찬가지로 보정
+		const float RightDot = FVector::DotProduct(RightDirection, GravityNormal);
+		RightDirection -= RightDot * GravityNormal;
+		RightDirection.Normalize();
+
+		DrawDebugLine(
+		GetWorld(),
+		GetActorLocation(),
+		GetActorLocation() + ForwardDirection * 100,
+		FColor::Red,
+		false,              // 게임이 실행 중일 때만 그리기
+		0.1f,               // 1초 동안 지속
+		0,                  // 기본 깊이 우선순위
+		5.0f                // 라인 두께
+	);
+		
 		// add movement 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);

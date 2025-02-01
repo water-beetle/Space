@@ -36,23 +36,32 @@ void ASun::Tick(float DeltaSeconds)
 	UpdateSunDirection();
 }
 
+void ASun::InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius)
+{
+	Super::InitPlanet(OrbitData, _OrbitCenter, Radius);
+
+	FLightingChannels& LightChannels = PlanetMesh->LightingChannels;
+	LightChannels.bChannel0 = false;
+	PlanetMesh->MarkRenderStateDirty();
+}
+
 void ASun::UpdateSunDirection()
 {
-	if(!PlayerPawn || !SunLight)
+	if(!PlayerPawn || !DirectionalSunLight)
 		return;
 	
 	FVector PlayerLocation = PlayerPawn->GetActorLocation();
 
-	FVector SunPosition = GetActorLocation();  // 예제 태양 위치
+	FVector SunPosition = GetActorLocation();
 	FVector SunDirection = (PlayerLocation - SunPosition).GetSafeNormal();
 	
 	FRotator TargetRotation = SunDirection.Rotation();
-	FRotator CurrentRotation = SunLight->GetActorRotation();
+	FRotator CurrentRotation = DirectionalSunLight->GetActorRotation();
 
 	float InterpSpeed = 1.0f;
 	FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), InterpSpeed);
 
-	SunLight->SetActorRotation(NewRotation);
+	DirectionalSunLight->SetActorRotation(NewRotation);
 	if (MPCInstance)
 	{
 		MPCInstance->SetVectorParameterValue(FName("SunDirection"), SunDirection);

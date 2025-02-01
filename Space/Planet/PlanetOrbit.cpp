@@ -192,7 +192,7 @@ void UPlanetOrbit::GenerateEllipseMesh(UProceduralMeshComponent* OrbitMesh)
 
 void UPlanetOrbit::PlanetRevolve(float DeltaTime)
 {
-	CurrentOrbitTheta += AngularSpeed * DeltaTime;
+	CurrentOrbitTheta += OrbitSpeed * DeltaTime;
 	if (CurrentOrbitTheta >= 360.0f) CurrentOrbitTheta -= 360.0f;
 
 	FVector OrbitPoint = CalculateOrbitPointsByTheta(CurrentOrbitTheta, OrbitRadiusX, OrbitRadiusY) + OrbitCenter;
@@ -202,13 +202,8 @@ void UPlanetOrbit::PlanetRevolve(float DeltaTime)
 void UPlanetOrbit::PlanetRotation(float DeltaTime)
 {
 	// 자전 각도 업데이트
-	CurrentRotationTheta += RotationSpeed * DeltaTime;
-	if (CurrentRotationTheta >= 360.0f) CurrentRotationTheta -= 360.0f;
-
-	// 자전 적용
-	FRotator NewRotation = GetOwner()->GetActorRotation();
-	NewRotation.Yaw = CurrentRotationTheta;
-	GetOwner()->SetActorRotation(NewRotation);
+	FRotator RotationDelta(0.0f, RotationSpeed * DeltaTime, 0.0f);
+	GetOwner()->AddActorWorldRotation(RotationDelta);
 }
 
 FVector UPlanetOrbit::CalculateOrbitPointsByTheta(float Theta, float RadiusX, float RadiusY) const

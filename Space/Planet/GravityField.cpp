@@ -26,14 +26,17 @@ void UGravityField::BeginPlay()
 	SetCollisionResponseToAllChannels(ECR_Ignore);
 	SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	
-	// BeginPlay에서 Overlap된 Actor 찾으려니까 안찾아짐
-	// BeginPlay 이후 0.1초 지연 후 초기화 함수 호출
-	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UGravityField::DelayedInitialize);
+	// // BeginPlay에서 Overlap된 Actor 찾으려니까 안찾아짐
+	// // BeginPlay 이후 0.1초 지연 후 초기화 함수 호출
+	// GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UGravityField::DelayedInitialize);
 }
 
 void UGravityField::SetGravityFieldSize(float Radius)
 {
 	SetSphereRadius(Radius, true); // 반지름을 500으로 설정
+
+	DelayedInitialize(); // 중력장 크기 설정 후, 캐릭터가 주위에 있는지 확인
+
 }
 
 void UGravityField::OnEnterGravityArea(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
