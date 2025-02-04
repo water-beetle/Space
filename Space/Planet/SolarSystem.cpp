@@ -2,6 +2,8 @@
 
 
 #include "SolarSystem.h"
+
+#include "PlanetNoiseData.h"
 #include "Sun.h"
 
 
@@ -75,7 +77,7 @@ void ASolarSystem::GeneratePlanetMesh()
 		if(bUseNewPlanetMesh || !IFileManager::Get().FileExists(*PlanetPath))
 		{
 			MeshGenerator.GeneratePlanetMesh(PlanetSaveDirectory, PlanetMeshName + FString::FromInt(i),
-				PlanetResolution, PlanetDataArray[i].Radius, PlanetDataArray[i].NoiseData);
+				PlanetResolution, PlanetDataArray[i].Radius, NoiseDataAsset->NoiseSettings);
 		}
 	}
 }

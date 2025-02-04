@@ -21,14 +21,12 @@ PlanetMeshGenerator::~PlanetMeshGenerator()
 UStaticMesh* PlanetMeshGenerator::GeneratePlanetMesh(const FString& PackagePath, const FString& MeshName,
 	int32 Resolution, float Radius, const FNoiseData& NoiseData)
 {
-	NoiseGenerator.InitNoiseParam(NoiseData);
-	
 	TArray<FVector3f> Vertices;
 	TArray<int32> Triangles;
 	TArray<FVector2f> UVs;
 	TArray<FVector3f> Normals;
 
-	GenerateMeshData(Resolution, Radius, Vertices, Triangles, UVs, Normals);
+	GenerateMeshData(Resolution, Radius, Vertices, Triangles, UVs, Normals, NoiseData);
 
 	FMeshDescription MeshDescription;
 	FillMeshDescription(MeshDescription, Vertices, Triangles, UVs, Normals);
@@ -37,19 +35,20 @@ UStaticMesh* PlanetMeshGenerator::GeneratePlanetMesh(const FString& PackagePath,
 }
 
 void PlanetMeshGenerator::GenerateMeshData(int32 Resolution, float Radius, TArray<FVector3f>& Vertices,
-                                           TArray<int32>& Triangles, TArray<FVector2f>& UVs, TArray<FVector3f>& Normals)
+                                           TArray<int32>& Triangles, TArray<FVector2f>& UVs, TArray<FVector3f>& Normals, const FNoiseData& NoiseData)
 {
 	// 각 면 생성
-	GenerateFace(FVector3f::UpVector, Resolution, Radius, Vertices, Triangles, UVs, Normals);
-	GenerateFace(-FVector3f::UpVector, Resolution, Radius, Vertices, Triangles, UVs, Normals);
-	GenerateFace(FVector3f::RightVector, Resolution, Radius, Vertices, Triangles, UVs, Normals);
-	GenerateFace(-FVector3f::RightVector, Resolution, Radius, Vertices, Triangles, UVs, Normals);
-	GenerateFace(FVector3f::ForwardVector, Resolution, Radius, Vertices, Triangles, UVs, Normals);
-	GenerateFace(-FVector3f::ForwardVector, Resolution, Radius, Vertices, Triangles, UVs, Normals);
+	GenerateFace(FVector3f::UpVector, Resolution, Radius, Vertices, Triangles, UVs, Normals, NoiseData);
+	GenerateFace(-FVector3f::UpVector, Resolution, Radius, Vertices, Triangles, UVs, Normals, NoiseData);
+	GenerateFace(FVector3f::RightVector, Resolution, Radius, Vertices, Triangles, UVs, Normals, NoiseData);
+	GenerateFace(-FVector3f::RightVector, Resolution, Radius, Vertices, Triangles, UVs, Normals, NoiseData);
+	GenerateFace(FVector3f::ForwardVector, Resolution, Radius, Vertices, Triangles, UVs, Normals, NoiseData);
+	GenerateFace(-FVector3f::ForwardVector, Resolution, Radius, Vertices, Triangles, UVs, Normals, NoiseData);
 }
 
 void PlanetMeshGenerator::GenerateFace(const FVector3f& LocalUp, int32 Resolution, float Radius,
-                                       TArray<FVector3f>& Vertices, TArray<int32>& Triangles, TArray<FVector2f>& UVs, TArray<FVector3f>& Normals)
+                                       TArray<FVector3f>& Vertices, TArray<int32>& Triangles, TArray<FVector2f>& UVs,
+                                       TArray<FVector3f>& Normals, const FNoiseData& NoiseData)
 {
 	FVector3f AxisA = FVector3f(LocalUp.Y, LocalUp.Z, LocalUp.X); // Up 벡터에 직교하는 벡터
     FVector3f AxisB = FVector3f::CrossProduct(LocalUp, AxisA);    // 나머지 축 계산
@@ -68,8 +67,9 @@ void PlanetMeshGenerator::GenerateFace(const FVector3f& LocalUp, int32 Resolutio
             FVector3f PointOnCube = LocalUp + (Percent.X - 0.5f) * 2.0f * AxisA + (Percent.Y - 0.5f) * 2.0f * AxisB;
             FVector3f PointOnSphere = GetNormalizedPositionOnSphere(PointOnCube);
 
-        	float Height = NoiseGenerator.GetHeight(PointOnSphere); // 노이즈 적용
-        	FVector3f AdjustedPoint = PointOnSphere * (Height + 1) * Radius;
+        	float Height = NoiseGenerator.GenerateNoise(PointOnSphere, NoiseData); // 노이즈 적용
+        	float scaleFactor = 0.2f;
+        	FVector3f AdjustedPoint = PointOnSphere * (Radius + Radius * scaleFactor * Height);
 
             // 정점 추가
             Vertices.Add(AdjustedPoint);
@@ -79,8 +79,8 @@ void PlanetMeshGenerator::GenerateFace(const FVector3f& LocalUp, int32 Resolutio
 	        UVs.Add(UV);
 
         	// Normal 추가
-        	FVector3f CalculatedNormal = CalculateNormal(PointOnSphere, Radius);
-        	Normals.Add(CalculatedNormal);
+        	//FVector3f CalculatedNormal = CalculateNormal(PointOnSphere, Radius);
+        	//Normals.Add(CalculatedNormal);
 
         	// 삼각형 추가
         	if (X < Resolution && Y < Resolution)
@@ -122,15 +122,17 @@ void PlanetMeshGenerator::FillMeshDescription(FMeshDescription& MeshDescription,
 		// 정점 인스턴스 생성
 		FVertexInstanceID InstanceID = MeshDescription.CreateVertexInstance(VertexID);
 
-		// 노멀과 UV 설정
-		if (Normals.IsValidIndex(i))
-		{
-			VertexNormals[InstanceID] = FVector3f(Normals[i]);
-		}
-		else
-		{
-			VertexNormals[InstanceID] = FVector3f(0.0f, 0.0f, 1.0f);
-		}
+		// 노멀과 UV 설정 -> 자동 계산하도록 수정
+		// if (Normals.IsValidIndex(i))
+		// {
+		// 	VertexNormals[InstanceID] = FVector3f(Normals[i]);
+		// }
+		// else
+		// {
+		// 	VertexNormals[InstanceID] = FVector3f(0.0f, 0.0f, 1.0f);
+		// }
+		
+		VertexNormals[InstanceID] = FVector3f(0.0f, 0.0f, 1.0f);
 
 		if (UVs.IsValidIndex(i))
 		{
@@ -181,8 +183,8 @@ UStaticMesh* PlanetMeshGenerator::CreateStaticMeshAsset(const FString& PackagePa
 	UStaticMesh* StaticMesh = NewObject<UStaticMesh>(Package, *MeshName, RF_Public | RF_Standalone);
 
 	FStaticMeshSourceModel& SourceModel = StaticMesh->AddSourceModel();
-	SourceModel.BuildSettings.bRecomputeNormals = false;
-	SourceModel.BuildSettings.bRecomputeTangents = false;
+	SourceModel.BuildSettings.bRecomputeNormals = true;
+	SourceModel.BuildSettings.bRecomputeTangents = true;
 
 	StaticMesh->GetStaticMaterials().Add(FStaticMaterial());  // 기본 재질 추가
 
@@ -233,29 +235,29 @@ FVector2f PlanetMeshGenerator::CalculateUV(const FVector2f& GridPosition, int32 
 	return GridPosition;
 }
 
-FVector3f PlanetMeshGenerator::CalculateNormal(const FVector3f& Vertex, float PlanetRadius)
-{
-	// 구의 Normal Vector
-	FVector3f UnitVector = Vertex.GetSafeNormal();
-	
-	const float Epsilon = (NoiseGenerator.NoiseData.BaseNoiseScale / 100.0f) * NoiseGenerator.NoiseData.Frequency;
-
-	// 노이즈 변화량 측정을 위해 축을 약간 이동
-	float NoiseXPlus = NoiseGenerator.GetHeight(FVector3f(Vertex.X + Epsilon, Vertex.Y, Vertex.Z));
-	float NoiseXMinus = NoiseGenerator.GetHeight(FVector3f(Vertex.X - Epsilon, Vertex.Y, Vertex.Z));
-    
-	float NoiseYPlus = NoiseGenerator.GetHeight(FVector3f(Vertex.X, Vertex.Y + Epsilon, Vertex.Z));
-	float NoiseYMinus = NoiseGenerator.GetHeight(FVector3f(Vertex.X, Vertex.Y - Epsilon, Vertex.Z));
-    
-	float NoiseZPlus = NoiseGenerator.GetHeight(FVector3f(Vertex.X, Vertex.Y, Vertex.Z + Epsilon));
-	float NoiseZMinus = NoiseGenerator.GetHeight(FVector3f(Vertex.X, Vertex.Y, Vertex.Z - Epsilon));
-
-	FVector3f Gradient;
-	Gradient.X = (NoiseXPlus - NoiseXMinus) / 2;
-	Gradient.Y = (NoiseYPlus - NoiseYMinus) / 2;
-	Gradient.Z = (NoiseZPlus - NoiseZMinus) / 2;
-
-	FVector3f H = Gradient - (FVector3f::DotProduct(Gradient, UnitVector) * UnitVector);
-	FVector3f Normal = (UnitVector - H * PlanetRadius).GetSafeNormal();
-	return Normal;
-}
+// FVector3f PlanetMeshGenerator::CalculateNormal(const FVector3f& Vertex, float PlanetRadius)
+// {
+// 	// 구의 Normal Vector
+// 	FVector3f UnitVector = Vertex.GetSafeNormal();
+// 	
+// 	const float Epsilon = (NoiseGenerator.NoiseData.BaseNoiseScale / 100.0f) * NoiseGenerator.NoiseData.Frequency;
+//
+// 	// 노이즈 변화량 측정을 위해 축을 약간 이동
+// 	float NoiseXPlus = NoiseGenerator.GetHeight(FVector3f(Vertex.X + Epsilon, Vertex.Y, Vertex.Z));
+// 	float NoiseXMinus = NoiseGenerator.GetHeight(FVector3f(Vertex.X - Epsilon, Vertex.Y, Vertex.Z));
+//     
+// 	float NoiseYPlus = NoiseGenerator.GetHeight(FVector3f(Vertex.X, Vertex.Y + Epsilon, Vertex.Z));
+// 	float NoiseYMinus = NoiseGenerator.GetHeight(FVector3f(Vertex.X, Vertex.Y - Epsilon, Vertex.Z));
+//     
+// 	float NoiseZPlus = NoiseGenerator.GetHeight(FVector3f(Vertex.X, Vertex.Y, Vertex.Z + Epsilon));
+// 	float NoiseZMinus = NoiseGenerator.GetHeight(FVector3f(Vertex.X, Vertex.Y, Vertex.Z - Epsilon));
+//
+// 	FVector3f Gradient;
+// 	Gradient.X = (NoiseXPlus - NoiseXMinus) / 2;
+// 	Gradient.Y = (NoiseYPlus - NoiseYMinus) / 2;
+// 	Gradient.Z = (NoiseZPlus - NoiseZMinus) / 2;
+//
+// 	FVector3f H = Gradient - (FVector3f::DotProduct(Gradient, UnitVector) * UnitVector);
+// 	FVector3f Normal = (UnitVector - H * PlanetRadius).GetSafeNormal();
+// 	return Normal;
+// }

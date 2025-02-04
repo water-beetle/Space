@@ -8,6 +8,7 @@
 #include "Space/Data/PlanetData.h"
 #include "SolarSystem.generated.h"
 
+class UPlanetNoiseData;
 class ADirectionalLight;
 class APlanet;
 class ASun;
@@ -45,29 +46,32 @@ public:
 	float MinOrbitRadius;	
 	UPROPERTY(EditAnywhere, Category="Solar System")
 	float MaxOrbitRadius;
+	UPROPERTY(EditAnywhere, Category="Solar System")
+	int32 PlanetNums;
 	
-	UPROPERTY(EditAnywhere, Category="Sun")
+	
+	UPROPERTY(EditAnywhere, Category="Solar System|Sun")
 	FVector SunPosition;
-	UPROPERTY(EditAnywhere, Category="Sun")
+	UPROPERTY(EditAnywhere, Category="Solar System|Sun")
 	float SunRadius;
-	UPROPERTY(EditAnywhere, Category="Sun")
+	UPROPERTY(EditAnywhere, Category="Solar System|Sun")
 	int32 SunResolution;
-	UPROPERTY(EditAnywhere, Category="Sun")
+	UPROPERTY(EditAnywhere, Category="Solar System|Sun")
 	UMaterialInterface* SunMaterial;
-	UPROPERTY(EditAnywhere, Category="Sun")
+	UPROPERTY(EditAnywhere, Category="Solar System|Sun")
 	ADirectionalLight* DirectionalSunLight;
 
-	UPROPERTY(EditAnywhere, Category="Planet")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Solar System|Planet")
+	UPlanetNoiseData* NoiseDataAsset;
+	UPROPERTY(EditAnywhere, Category="Solar System|Planet")
 	bool bUseNewPlanetMesh;
-	UPROPERTY(EditAnywhere, Category="Planet")
-	int32 PlanetNums;
-	UPROPERTY(EditAnywhere, Category="Planet")
+	UPROPERTY(EditAnywhere, Category="Solar System|Planet")
 	int32 PlanetMinRadius;
-	UPROPERTY(EditAnywhere, Category="Planet")
+	UPROPERTY(EditAnywhere, Category="Solar System|Planet")
 	int32 PlanetMaxRadius;
-	UPROPERTY(EditAnywhere, Category="Planet")
+	UPROPERTY(EditAnywhere, Category="Solar System|Planet")
 	int32 PlanetResolution;
-	UPROPERTY(EditAnywhere, Category = "Planet")
+	UPROPERTY(EditAnywhere, Category = "Solar System|Planet")
 	TArray<UMaterialInterface*> PlanetMaterialArray;
 	
 	FString PlanetSaveDirectory = "/Game/Meshes/Planet/";

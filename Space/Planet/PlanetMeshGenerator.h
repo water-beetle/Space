@@ -22,9 +22,9 @@ private:
 	FPlanetNoiseGenerator NoiseGenerator;
 	
 	void GenerateMeshData(int32 Resolution, float Radius, TArray<FVector3f>& Vertices,
-		TArray<int32>& Triangles, TArray<FVector2f>& UVs, TArray<FVector3f>& Normals);
+		TArray<int32>& Triangles, TArray<FVector2f>& UVs, TArray<FVector3f>& Normals, const FNoiseData& NoiseData);
 	void GenerateFace(const FVector3f& LocalUp, int32 Resolution, float Radius, TArray<FVector3f>& Vertices,
-		TArray<int32>& Triangles, TArray<FVector2f>& UVs, TArray<FVector3f>& Normals);
+		TArray<int32>& Triangles, TArray<FVector2f>& UVs, TArray<FVector3f>& Normals, const FNoiseData& NoiseData);
 	void FillMeshDescription(FMeshDescription& MeshDescription, const TArray<FVector3f>& Vertices, const TArray<int32>& Triangles,
 		const TArray<FVector2f>& UVs, const TArray<FVector3f>& Normals);
 	UStaticMesh* CreateStaticMeshAsset(const FString& PackagePath, const FString& MeshName, const FMeshDescription& MeshDescription);

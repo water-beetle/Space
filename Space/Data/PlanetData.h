@@ -61,36 +61,95 @@ struct FNoiseData
 
 	FNoiseData()
 	{
-		Frequency = 0.01f;
-		Lacunarity = 2.0f;
-		Persistence = 0.5f;
-		BaseNoiseScale = 10.0f;
-		BaseNoiseIntensity = 1.0f;
-		MountainNoiseScale = 20.0f;
-		MountainIntensity = 1.5f;
+
+		WarpAmp = 0.6f;
+		WarpFrequency = 1.5f;
+		
+		FBMFrequency = 1.2f;
+		FBMOctaves = 8;
+		FBMLacunarity = 2.f;
+		FBMGain = 0.7f;
+
+		// Ridged
+		RidgedFrequency = 1.5f;
+		RidgedOctaves = 4;
+		RidgedLacunarity = 2.f;
+		RidgedGain = 0.5f;
+		RidgedOffset = 1.f;
+
+		TerrainThresholdLow = 0.f;
+		TerrainThresholdHigh = 1.f;
+		DisplacementScale = 1.f;
 	}
 
 	void SetZero()
 	{
-		Frequency = 0.f;
-		BaseNoiseIntensity = 0.f;
-		MountainIntensity = 0.f;
+		WarpAmp = 0.0f;
+		WarpFrequency = 0.f;
+		FBMFrequency = 0.f;
+		FBMOctaves = 0;
+		FBMLacunarity = 0.f;
+		FBMGain = 0.f;
+
+		// Ridged
+		RidgedFrequency = 0.f;
+		RidgedOctaves = 0;
+		RidgedLacunarity = 0.f;
+		RidgedGain = 0.f;
+		RidgedOffset = 0.f;
+
+		TerrainThresholdLow = 0.f;
+		TerrainThresholdHigh = 0.f;
+		DisplacementScale = 0.f;
 	}
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
-	float Frequency;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
-	float Lacunarity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
-	float Persistence;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
-	float BaseNoiseScale;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
-	float BaseNoiseIntensity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
-	float MountainNoiseScale;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
-	float MountainIntensity;
+	// ---------------- Domain Warp Settings ----------------
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|DomainWarp")
+	float WarpAmp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|DomainWarp")
+	float WarpFrequency;
+	
+	// ---------------- FBM 노이즈 파라미터 (평원/대지) ----------------
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|FBM")
+	float FBMFrequency;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|FBM")
+	int32 FBMOctaves;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|FBM")
+	float FBMLacunarity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|FBM")
+	float FBMGain;
+
+	// ---------------- Ridged 노이즈 파라미터 (산맥) ----------------
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|Ridged")
+	float RidgedFrequency;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|Ridged")
+	int32 RidgedOctaves;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|Ridged")
+	float RidgedLacunarity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|Ridged")
+	float RidgedGain;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|Ridged")
+	float RidgedOffset;
+
+	// ---------------- Biome & Blending ----------------
+	// FBM과 Ridged를 보간할 때 사용될 임계값
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|Blend")
+	float TerrainThresholdLow;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Noise|Blend")
+	float TerrainThresholdHigh;
+
+	// 최종 변위 스케일
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Planet|Mesh")
+	float DisplacementScale;
 };
 
 
