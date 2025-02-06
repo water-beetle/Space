@@ -40,6 +40,11 @@ void ASolarSystem::BeginPlay()
 	GeneratePlanetMesh();
 	GenerateSun();
 	GeneratePlanets();
+	
+	// 가끔씩 함수가 실행이 안됨 -> 다른 Actor들이 초기화 되기 전에 실행되어 그런듯, 다음 프레임에서 실행되도록 수정
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ASolarSystem::PlaceMainCharacter, .3f, false);
+	
 }
 
 // Called every frame
@@ -120,6 +125,54 @@ void ASolarSystem::GeneratePlanets()
 		Planet->SetPlanetMeshAndMaterial(PlanetMesh, PlanetMaterial);
 
 		PlanetDataArray[i].Planet = Planet;
+	}
+}
+
+void ASolarSystem::PlaceMainCharacter()
+{
+	// 무작위 번째의 행성에서 플레이어를 생성
+	// 행성 공전, 자전중에 플레이어를 위치시키니까 캐릭터가 행성위에 제대로 서있지 못함
+	// 캐릭터를 행성에 먼저 배치하고, 행성 자전, 공전 코드 실행
+	
+	if(APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		PlayerPawn = PC->GetPawn();
+	}
+
+	if(PlayerPawn)
+	{
+		int randInd = FMath::RandRange(0, PlanetNums-1);
+		if(PlanetNums > 0)
+		{
+			FVector EndPoint = PlanetDataArray[randInd].Planet->GetActorLocation();;
+			FVector StartPoint = EndPoint + FVector::UpVector * PlanetDataArray[randInd].Radius * 2;
+
+			FHitResult HitResult;
+			FCollisionQueryParams QueryParams;
+
+			if(GetWorld()->LineTraceSingleByChannel(HitResult, StartPoint, EndPoint, ECC_Visibility, QueryParams))
+			{
+				FVector SpawnLocation = HitResult.Location + (HitResult.Location - EndPoint).GetSafeNormal() * 100.f; // 약간 위에 스폰
+				FRotator SpawnRotation = FRotationMatrix::MakeFromZ((HitResult.Location - EndPoint)).Rotator();
+				
+				PlayerPawn->SetActorLocation(SpawnLocation);
+				PlayerPawn->SetActorRotation(SpawnRotation);
+				PlanetDataArray[randInd].Planet->AddCharacterToGravityField();
+				
+			}
+		}
+	}
+
+	// 타이머 없이 공전, 자전하니 캐릭터가 착륙할 시간이 부족 
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ASolarSystem::SetMovePlanet, .5f, false);
+}
+
+void ASolarSystem::SetMovePlanet()
+{
+	for(const auto& PlanetData : PlanetDataArray)
+	{
+		PlanetData.Planet->SetMove(true);
 	}
 }
 

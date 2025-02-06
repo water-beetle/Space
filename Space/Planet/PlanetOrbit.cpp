@@ -19,6 +19,8 @@ UPlanetOrbit::UPlanetOrbit()
 		OrbitMaterial = MaterialFinder.Object;
 	}
 	
+	bMove = false;
+	
 	OrbitRadiusX = 10000;
 	OrbitRadiusY = 5000;
 	OrbitIncline = FRotator(10, 10, 10);
@@ -45,8 +47,11 @@ void UPlanetOrbit::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	PlanetRevolve(DeltaTime);
-	PlanetRotation(DeltaTime);
+	if(bMove)
+	{
+		PlanetRevolve(DeltaTime);
+		PlanetRotation(DeltaTime);
+	}
 }
 
 void UPlanetOrbit::InitOrbit(const FOrbitData& OrbitData, const FVector _OrbitCenter)

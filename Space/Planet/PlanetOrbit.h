@@ -32,7 +32,7 @@ public:
 
 	void InitOrbit(const FOrbitData& OrbitData, const FVector _OrbitCenter); // 궤도에 맞는 행성의 초기 위치 설정
 	void SetOrbitVisualization(UProceduralMeshComponent* OrbitMesh); // 궤도 시각화 초기화
-
+	FORCEINLINE void SetMove(bool _bMove){bMove = _bMove;}
 private:
 	void GenerateEllipseMesh(UProceduralMeshComponent* OrbitMesh); // 타원 궤도 생성
 	void PlanetRevolve(float DeltaTime); // 공전처리
@@ -40,6 +40,7 @@ private:
 	FVector CalculateOrbitPointsByTheta(float Theta, float RadiusX, float RadiusY) const;
 	float CalculateEllipseCircumference(float RadiusX, float RadiusY) const; // 타원 둘레 근사
 
+	bool bMove;
 
 	float OrbitRadiusX;
 	float OrbitRadiusY;
@@ -53,4 +54,5 @@ private:
 	float AngularSpeed; // 각속도
 	float CurrentOrbitTheta; // 현재 공전 각도
 	float CurrentRotationTheta; // 현재 자전 각도
+
 };

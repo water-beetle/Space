@@ -35,7 +35,7 @@ void UGravityField::SetGravityFieldSize(float Radius)
 {
 	SetSphereRadius(Radius, true); // 반지름을 500으로 설정
 
-	DelayedInitialize(); // 중력장 크기 설정 후, 캐릭터가 주위에 있는지 확인
+	AddCharacterToGravityField(); // 중력장 크기 설정 후, 캐릭터가 주위에 있는지 확인
 
 }
 
@@ -65,7 +65,7 @@ void UGravityField::OnExitGravityArea(UPrimitiveComponent* OverlappedComp, AActo
 	}
 }
 
-void UGravityField::DelayedInitialize()
+void UGravityField::AddCharacterToGravityField()
 {
 	TArray<AActor*> OverlappingActors;
 	GetOwner()->GetOverlappingActors(OverlappingActors);

@@ -55,13 +55,18 @@ void APlanet::SetPlanetMeshAndMaterial(UStaticMesh* StaticMesh, UMaterialInterfa
 	}
 }
 
+void APlanet::AddCharacterToGravityField()
+{
+	GravityField->AddCharacterToGravityField();
+}
+
 void APlanet::InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius)
 {
 	PlanetOrbitComponent->InitOrbit(OrbitData, _OrbitCenter);
 	PlanetOrbitComponent->SetOrbitVisualization(OrbitMesh); // 행성의 공전궤도 설정
 
 	// 중력장 범위 설정
-	GravityField->SetGravityFieldSize(Radius * 10 + 100);
+	GravityField->SetGravityFieldSize(Radius * 2 + 200);
 	PlanetRadius = Radius;
 }
 

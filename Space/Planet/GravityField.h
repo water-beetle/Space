@@ -31,7 +31,7 @@ public:
 	float GravityScale;
 
 	void SetGravityFieldSize(float Radius);
-	void DelayedInitialize();
+	void AddCharacterToGravityField();
 
 private:
 	// 중력 필드 충돌 처리

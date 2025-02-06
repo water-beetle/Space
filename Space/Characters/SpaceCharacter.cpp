@@ -67,6 +67,8 @@ void ASpaceCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	
 }
 
 void ASpaceCharacter::Tick(float DeltaSeconds)
@@ -76,7 +78,7 @@ void ASpaceCharacter::Tick(float DeltaSeconds)
 	FVector TargetGravityDir = GravityBody->GetGravityDirection().GetSafeNormal();
 
 	// 현재 중력 방향에서 목표 중력 방향으로 점진적으로 보간
-	const float GravityChangeSpeed = 2.0f; // 중력 방향 변화 속도 (값이 클수록 빠르게 반응)
+	const float GravityChangeSpeed = 5.0f; // 중력 방향 변화 속도 (값이 클수록 빠르게 반응)
 	GravityDir = FMath::VInterpTo(GravityDir, TargetGravityDir, DeltaSeconds, GravityChangeSpeed).GetSafeNormal();
 	
 	GetCharacterMovement()->SetGravityDirection(GravityDir);
@@ -148,17 +150,6 @@ void ASpaceCharacter::Move(const FInputActionValue& Value)
 		const float RightDot = FVector::DotProduct(RightDirection, GravityNormal);
 		RightDirection -= RightDot * GravityNormal;
 		RightDirection.Normalize();
-
-		DrawDebugLine(
-		GetWorld(),
-		GetActorLocation(),
-		GetActorLocation() + ForwardDirection * 100,
-		FColor::Red,
-		false,              // 게임이 실행 중일 때만 그리기
-		0.1f,               // 1초 동안 지속
-		0,                  // 기본 깊이 우선순위
-		5.0f                // 라인 두께
-	);
 		
 		// add movement 
 		AddMovementInput(ForwardDirection, MovementVector.Y);

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PlanetNoiseGenerator.h"
+#include "PlanetOrbit.h"
 #include "GameFramework/Actor.h"
 #include "Planet.generated.h"
 
@@ -35,9 +36,10 @@ public:
 	float PlanetRadius;
 
 	void SetPlanetMeshAndMaterial(UStaticMesh* StaticMesh, UMaterialInterface* PlanetMaterial);
+	void AddCharacterToGravityField();
 	virtual void InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius);
 
-	
+	FORCEINLINE void SetMove(bool bMove) const {PlanetOrbitComponent->SetMove((bMove));}
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Planet")
 	UProceduralMeshComponent* OrbitMesh;

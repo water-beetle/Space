@@ -36,6 +36,7 @@ public:
 	ASolarSystem();
 
 protected:
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	// Called every frame
@@ -82,10 +83,13 @@ private:
 	void GeneratePlanetMesh();
 	void GenerateSun();
 	void GeneratePlanets();
+	void PlaceMainCharacter();
+	void SetMovePlanet();
 
 	PlanetMeshGenerator MeshGenerator;
 
 	ASun* Sun;
+	APawn* PlayerPawn;
 	FNoiseData SunNoiseData;
 	FOrbitData SunOrbitData;
 
