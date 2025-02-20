@@ -4,23 +4,37 @@
 
 #include "CoreMinimal.h"
 #include "PlanetNoiseGenerator.h"
+#include "PlanetGenerator.generated.h"
 
+class APlanet;
 struct FNoiseData;
 /**
  * 
  */
-class SPACE_API PlanetMeshGenerator
+UCLASS()
+class SPACE_API UPlanetGenerator : public UObject
 {
-public:
-	PlanetMeshGenerator();
-	~PlanetMeshGenerator();
+
+	GENERATED_BODY()
 	
-	UStaticMesh* GeneratePlanetMesh(const FString& PackagePath, const FString& MeshName, int32 Resolution,
-		float Radius, const FNoiseData& NoiseData);
+public:
+	UPlanetGenerator();
+	
+	APlanet* GeneratePlanet(FString PlanetName, int32 Resolution, float Radius, const FNoiseData& NoiseData);
 
 private:
 	FPlanetNoiseGenerator NoiseGenerator;
+
+	/*
+	 * Save Bluepriunt
+	 */
+	FString PlanetPackagePath = "/Game/Meshes/Planet/";
 	
+	/*
+	 * Planet Procedural Static Mesh
+	 */
+	UStaticMesh* GeneratePlanetMesh(const FString& PackagePath, const FString& MeshName, int32 Resolution,
+		float Radius, const FNoiseData& NoiseData);
 	void GenerateMeshData(int32 Resolution, float Radius, TArray<FVector3f>& Vertices,
 		TArray<int32>& Triangles, TArray<FVector2f>& UVs, TArray<FVector3f>& Normals, const FNoiseData& NoiseData);
 	void GenerateFace(const FVector3f& LocalUp, int32 Resolution, float Radius, TArray<FVector3f>& Vertices,
@@ -30,5 +44,9 @@ private:
 	UStaticMesh* CreateStaticMeshAsset(const FString& PackagePath, const FString& MeshName, const FMeshDescription& MeshDescription);
 	FVector3f GetNormalizedPositionOnSphere(const FVector3f& Position) const;
 	FVector2f CalculateUV(const FVector2f& GridPosition,int32 Resolution);
-	FVector3f CalculateNormal(const FVector3f& Vertex, float PlanetRadius);
+	//FVector3f CalculateNormal(const FVector3f& Vertex, float PlanetRadius);
+
+	/*
+	 * Planet Procedural Foliage
+	 */
 };

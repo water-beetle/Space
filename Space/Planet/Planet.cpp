@@ -3,8 +3,8 @@
 
 #include "Planet.h"
 
-#include "GravityFieldCenter.h"
-#include "PlanetOrbit.h"
+#include "Space/Planet/Physics/GravityFieldCenter.h"
+#include "Space/Planet/Physics/PlanetOrbit.h"
 #include "ProceduralMeshComponent.h"
 
 // Sets default values
@@ -42,13 +42,17 @@ void APlanet::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
-void APlanet::SetPlanetMeshAndMaterial(UStaticMesh* StaticMesh, UMaterialInterface* PlanetMaterial)
+void APlanet::SetPlanetMesh(UStaticMesh* StaticMesh)
 {
 	if(StaticMesh)
 	{
 		PlanetMesh->SetStaticMesh(StaticMesh);
 	}
+}
 
+void APlanet::SetPlanetMaterial(UMaterialInterface* PlanetMaterial)
+{
+	
 	if(PlanetMaterial)
 	{
 		PlanetMesh->SetMaterial(0, PlanetMaterial);

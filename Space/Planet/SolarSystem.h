@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PlanetMeshGenerator.h"
+#include "Space/Planet/ProceduralGeneration/PlanetGenerator.h"
 #include "GameFramework/Actor.h"
 #include "Space/Data/PlanetData.h"
 #include "SolarSystem.generated.h"
@@ -80,13 +80,13 @@ public:
 
 private:
 	void SetRandomPlanetData();
-	void GeneratePlanetMesh();
+	//void GeneratePlanetMesh();
 	void GenerateSun();
 	void GeneratePlanets();
 	void PlaceMainCharacter();
 	void SetMovePlanet();
 
-	PlanetMeshGenerator MeshGenerator;
+	UPlanetGenerator MeshGenerator;
 
 	ASun* Sun;
 	APawn* PlayerPawn;

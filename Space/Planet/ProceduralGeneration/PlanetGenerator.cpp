@@ -1,26 +1,65 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PlanetMeshGenerator.h"
+#include "PlanetGenerator.h"
+
+#include "Space/Planet/Planet.h"
 #include "StaticMeshAttributes.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Kismet2/KismetEditorUtilities.h"
 #include "PhysicsEngine/BodySetup.h"
 #include "UObject/SavePackage.h"
 
 
 struct FNoiseData;
 
-PlanetMeshGenerator::PlanetMeshGenerator()
+UPlanetGenerator::UPlanetGenerator()
 {
 }
 
-PlanetMeshGenerator::~PlanetMeshGenerator()
+APlanet* UPlanetGenerator::GeneratePlanet(FString PlanetName, int32 Resolution, float Radius, const FNoiseData& NoiseData)
 {
+	/*
+	 * 행성을 생성하는 함수
+	 * 1. 행성의 Static Mesh 생성
+	 * 2. 행성의 Procedural Foliage 생성(추후 구현 예정)
+	 * 3. APlanet 생성 후 Static Mesh, Procedural Foliage 적용
+	 */
+
+	// 1. 행성의 Static Mesh 생성
+	UStaticMesh* GeneratedPlanetMesh = GeneratePlanetMesh(PlanetPackagePath, PlanetName, Resolution, Radius, NoiseData);
+
+	// 2. 행성의 Procedural Foliage 생성
+
+	// 3. APlanet 생성 후 Static Mesh, Procedural Foliage 적용
+	APlanet* GeneratedPlanet = GetWorld()->SpawnActor<APlanet>(APlanet::StaticClass(), FVector::Zero(), FRotator::ZeroRotator);
+	
+	return GeneratedPlanet;
+	
 }
 
-UStaticMesh* PlanetMeshGenerator::GeneratePlanetMesh(const FString& PackagePath, const FString& MeshName,
-	int32 Resolution, float Radius, const FNoiseData& NoiseData)
+UStaticMesh* UPlanetGenerator::GeneratePlanetMesh(const FString& PackagePath, const FString& MeshName,
+                                                 int32 Resolution, float Radius, const FNoiseData& NoiseData)
 {
+	FString PlanetMeshFilePath = FPackageName::LongPackageNameToFilename(PackagePath + MeshName,
+		FPackageName::GetAssetPackageExtension());
+
+	// 이미 입력받은 MeshName으로 생성된 Mesh가 있다면 해당 Mesh를 반환
+	if(IFileManager::Get().FileExists(*PlanetMeshFilePath))
+	{
+		UStaticMesh* ExistingPlanetMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(),
+			nullptr, *PlanetMeshFilePath));
+		
+		if (ExistingPlanetMesh)
+		{
+			return ExistingPlanetMesh;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to load existing mesh: %s"), *PlanetMeshFilePath);
+		}
+	}
+	
 	TArray<FVector3f> Vertices;
 	TArray<int32> Triangles;
 	TArray<FVector2f> UVs;
@@ -34,7 +73,7 @@ UStaticMesh* PlanetMeshGenerator::GeneratePlanetMesh(const FString& PackagePath,
 	return CreateStaticMeshAsset(PackagePath, MeshName, MeshDescription);	
 }
 
-void PlanetMeshGenerator::GenerateMeshData(int32 Resolution, float Radius, TArray<FVector3f>& Vertices,
+void UPlanetGenerator::GenerateMeshData(int32 Resolution, float Radius, TArray<FVector3f>& Vertices,
                                            TArray<int32>& Triangles, TArray<FVector2f>& UVs, TArray<FVector3f>& Normals, const FNoiseData& NoiseData)
 {
 	// 각 면 생성
@@ -46,7 +85,7 @@ void PlanetMeshGenerator::GenerateMeshData(int32 Resolution, float Radius, TArra
 	GenerateFace(-FVector3f::ForwardVector, Resolution, Radius, Vertices, Triangles, UVs, Normals, NoiseData);
 }
 
-void PlanetMeshGenerator::GenerateFace(const FVector3f& LocalUp, int32 Resolution, float Radius,
+void UPlanetGenerator::GenerateFace(const FVector3f& LocalUp, int32 Resolution, float Radius,
                                        TArray<FVector3f>& Vertices, TArray<int32>& Triangles, TArray<FVector2f>& UVs,
                                        TArray<FVector3f>& Normals, const FNoiseData& NoiseData)
 {
@@ -100,7 +139,7 @@ void PlanetMeshGenerator::GenerateFace(const FVector3f& LocalUp, int32 Resolutio
     }
 }
 
-void PlanetMeshGenerator::FillMeshDescription(FMeshDescription& MeshDescription, const TArray<FVector3f>& Vertices,
+void UPlanetGenerator::FillMeshDescription(FMeshDescription& MeshDescription, const TArray<FVector3f>& Vertices,
 	const TArray<int32>& Triangles, const TArray<FVector2f>& UVs, const TArray<FVector3f>& Normals)
 {
 	// 1. MeshDescription 속성 설정
@@ -175,7 +214,7 @@ void PlanetMeshGenerator::FillMeshDescription(FMeshDescription& MeshDescription,
 	UE_LOG(LogTemp, Log, TEXT("Vertices: %d, Triangles: %d"), Vertices.Num(), Triangles.Num() / 3);
 }
 
-UStaticMesh* PlanetMeshGenerator::CreateStaticMeshAsset(const FString& PackagePath, const FString& MeshName,
+UStaticMesh* UPlanetGenerator::CreateStaticMeshAsset(const FString& PackagePath, const FString& MeshName,
 	const FMeshDescription& MeshDescription)
 {	
 	UPackage* Package = CreatePackage(*PackagePath);
@@ -224,18 +263,18 @@ UStaticMesh* PlanetMeshGenerator::CreateStaticMeshAsset(const FString& PackagePa
 	return StaticMesh;
 }
 
-FVector3f PlanetMeshGenerator::GetNormalizedPositionOnSphere(const FVector3f& Position) const
+FVector3f UPlanetGenerator::GetNormalizedPositionOnSphere(const FVector3f& Position) const
 {
 	return Position.GetSafeNormal(); // 구형으로 변환
 }
 
-FVector2f PlanetMeshGenerator::CalculateUV(const FVector2f& GridPosition, int32 Resolution)
+FVector2f UPlanetGenerator::CalculateUV(const FVector2f& GridPosition, int32 Resolution)
 {
 	// Face내의 Resolution 한칸에 Texture 적용하는 방식으로 구현
 	return GridPosition;
 }
 
-// FVector3f PlanetMeshGenerator::CalculateNormal(const FVector3f& Vertex, float PlanetRadius)
+// FVector3f UPlanetGenerator::CalculateNormal(const FVector3f& Vertex, float PlanetRadius)
 // {
 // 	// 구의 Normal Vector
 // 	FVector3f UnitVector = Vertex.GetSafeNormal();

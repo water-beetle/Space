@@ -3,7 +3,6 @@
 
 #include "SolarSystem.h"
 
-#include "PlanetNoiseData.h"
 #include "Sun.h"
 
 
@@ -37,7 +36,7 @@ void ASolarSystem::BeginPlay()
 	Super::BeginPlay();
 	
 	SetRandomPlanetData();
-	GeneratePlanetMesh();
+	//GeneratePlanetMesh();
 	GenerateSun();
 	GeneratePlanets();
 	
@@ -64,28 +63,28 @@ void ASolarSystem::SetRandomPlanetData()
 	}
 }
 
-void ASolarSystem::GeneratePlanetMesh()
-{
-	FString SunPath = FPackageName::LongPackageNameToFilename(PlanetSaveDirectory + "Sun",
-		FPackageName::GetAssetPackageExtension());
-
-	if(!IFileManager::Get().FileExists(*SunPath))
-	{
-		MeshGenerator.GeneratePlanetMesh(PlanetSaveDirectory, "Sun", SunResolution, SunRadius, SunNoiseData);
-	}
-	
-	for (int i = 0; i < PlanetNums; ++i)
-	{
-		FString PlanetPath = FPackageName::LongPackageNameToFilename(PlanetSaveDirectory + PlanetMeshName +
-			FString::FromInt(i), FPackageName::GetAssetPackageExtension());
-
-		if(bUseNewPlanetMesh || !IFileManager::Get().FileExists(*PlanetPath))
-		{
-			MeshGenerator.GeneratePlanetMesh(PlanetSaveDirectory, PlanetMeshName + FString::FromInt(i),
-				PlanetResolution, PlanetDataArray[i].Radius, NoiseDataAsset->NoiseSettings);
-		}
-	}
-}
+// void ASolarSystem::GeneratePlanetMesh()
+// {
+// 	FString SunPath = FPackageName::LongPackageNameToFilename(PlanetSaveDirectory + "Sun",
+// 		FPackageName::GetAssetPackageExtension());
+//
+// 	if(!IFileManager::Get().FileExists(*SunPath))
+// 	{
+// 		MeshGenerator.GeneratePlanetMesh(PlanetSaveDirectory, "Sun", SunResolution, SunRadius, SunNoiseData);
+// 	}
+// 	
+// 	for (int i = 0; i < PlanetNums; ++i)
+// 	{
+// 		FString PlanetPath = FPackageName::LongPackageNameToFilename(PlanetSaveDirectory + PlanetMeshName +
+// 			FString::FromInt(i), FPackageName::GetAssetPackageExtension());
+//
+// 		if(bUseNewPlanetMesh || !IFileManager::Get().FileExists(*PlanetPath))
+// 		{
+// 			MeshGenerator.GeneratePlanetMesh(PlanetSaveDirectory, PlanetMeshName + FString::FromInt(i),
+// 				PlanetResolution, PlanetDataArray[i].Radius, NoiseDataAsset->NoiseSettings);
+// 		}
+// 	}
+// }
 
 void ASolarSystem::GenerateSun()
 {
@@ -99,7 +98,7 @@ void ASolarSystem::GenerateSun()
 	
 	FString SunPath = PlanetSaveDirectory + TEXT("Sun");
 	UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, *SunPath);
-	Sun->SetPlanetMeshAndMaterial(Mesh, SunMaterial);
+	//Sun->SetPlanetMeshAndMaterial(Mesh, SunMaterial);
 }
 
 void ASolarSystem::GeneratePlanets()
@@ -122,7 +121,7 @@ void ASolarSystem::GeneratePlanets()
 			PlanetMaterial = PlanetMaterialArray[RandomIndex];
 		}
 		
-		Planet->SetPlanetMeshAndMaterial(PlanetMesh, PlanetMaterial);
+		//Planet->SetPlanetMeshAndMaterial(PlanetMesh, PlanetMaterial);
 
 		PlanetDataArray[i].Planet = Planet;
 	}

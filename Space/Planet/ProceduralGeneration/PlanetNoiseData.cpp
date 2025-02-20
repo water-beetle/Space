@@ -1,5 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Space/Planet/PlanetNoiseData.h"
+#include "Space/Planet/ProceduralGeneration/PlanetNoiseData.h"
 
