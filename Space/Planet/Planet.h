@@ -7,7 +7,6 @@
 #include "GameFramework/Actor.h"
 #include "Planet.generated.h"
 
-class UProceduralMeshComponent;
 class UPlanetOrbit;
 class UGravityFieldCenter;
 
@@ -36,14 +35,15 @@ public:
 	void SetPlanetMesh(UStaticMesh* StaticMesh);
 	void SetPlanetMaterial(UMaterialInterface* PlanetMaterial);
 	
-	void AddCharacterToGravityField();
-	virtual void InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius);
+	virtual void InitPlanet(const FOrbitData& OrbitData, float Radius);
 
-	FORCEINLINE void SetMove(bool bMove) const {PlanetOrbitComponent->SetMove((bMove));}
-private:
-	UPROPERTY(VisibleAnywhere, Category = "Planet")
-	UProceduralMeshComponent* OrbitMesh;
+	void AddCharacterToGravityField();
 	
+	// 행성의 공전, 자전을 설정하는 함수
+	FORCEINLINE void SetMove(bool bMove) const {PlanetOrbitComponent->SetMove((bMove));}
+	FORCEINLINE float GetRadius() const {return PlanetRadius;}
+
+private:
 	UPROPERTY(EditAnywhere, Category = "Planet")
 	UPlanetOrbit* PlanetOrbitComponent;
 };

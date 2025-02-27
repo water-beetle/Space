@@ -13,6 +13,12 @@ UPlanetOrbit::UPlanetOrbit()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	OrbitMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("OrbitMesh"));
+	OrbitMesh->SetUsingAbsoluteRotation(true); // 공전 궤도를 나타내기 행성의 위치, 각도에 무관하게 적용
+	OrbitMesh->SetUsingAbsoluteLocation(true);
+	OrbitMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	OrbitMesh->CastShadow = false;
+	
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Game/Materials/Space/M_Orbit.M_Orbit"));
 	if (MaterialFinder.Succeeded())
 	{
@@ -41,6 +47,19 @@ void UPlanetOrbit::BeginPlay()
 	Super::BeginPlay();
 }
 
+void UPlanetOrbit::OnRegister()
+{
+	Super::OnRegister();
+
+	if (AActor* Owner = GetOwner())
+	{
+		if (Owner->GetRootComponent())
+		{
+			OrbitMesh->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		}
+	}
+}
+
 
 // Called every frame
 void UPlanetOrbit::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -49,12 +68,13 @@ void UPlanetOrbit::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 	if(bMove)
 	{
+		// 공전과 자전 수행
 		PlanetRevolve(DeltaTime);
 		PlanetRotation(DeltaTime);
 	}
 }
 
-void UPlanetOrbit::InitOrbit(const FOrbitData& OrbitData, const FVector _OrbitCenter)
+void UPlanetOrbit::InitOrbit(const FOrbitData& OrbitData)
 {
 	OrbitRadiusX = OrbitData.OrbitRadiusX;
 	OrbitRadiusY = OrbitData.OrbitRadiusY;
@@ -63,7 +83,7 @@ void UPlanetOrbit::InitOrbit(const FOrbitData& OrbitData, const FVector _OrbitCe
 	RotationSpeed = OrbitData.RotationSpeed;
 	SegmentCount = OrbitData.SegmentCount;
 	Thickness = OrbitData.Thickness;
-	OrbitCenter = _OrbitCenter;
+	OrbitCenter = OrbitData.OrbitCenter;
 
 	// 공전 각속도 설정
 	float EllipseCircumference = CalculateEllipseCircumference(OrbitRadiusX, OrbitRadiusY);
@@ -90,17 +110,13 @@ void UPlanetOrbit::InitOrbit(const FOrbitData& OrbitData, const FVector _OrbitCe
 
 	// 위치 설정
 	GetOwner()->SetActorLocation(InitialPosition);
-}
 
-void UPlanetOrbit::SetOrbitVisualization(UProceduralMeshComponent* OrbitMesh)
-{
-	GenerateEllipseMesh(OrbitMesh);
-
-	// 타원 궤도를 Static Mesh 스케일로 조정
+	// 공전 궤도 Mesh 생성 및 설정
+	GenerateEllipseMesh();
 	OrbitMesh->SetWorldLocation(OrbitCenter);
 }
 
-void UPlanetOrbit::GenerateEllipseMesh(UProceduralMeshComponent* OrbitMesh)
+void UPlanetOrbit::GenerateEllipseMesh()
 {
 	if (SegmentCount < 3) SegmentCount = 3; // 최소 3
 
@@ -197,6 +213,10 @@ void UPlanetOrbit::GenerateEllipseMesh(UProceduralMeshComponent* OrbitMesh)
 
 void UPlanetOrbit::PlanetRevolve(float DeltaTime)
 {
+	/*
+	 * 행성의 공전 처리 함수
+	 */
+	
 	CurrentOrbitTheta += OrbitSpeed * DeltaTime;
 	if (CurrentOrbitTheta >= 360.0f) CurrentOrbitTheta -= 360.0f;
 
@@ -206,6 +226,10 @@ void UPlanetOrbit::PlanetRevolve(float DeltaTime)
 
 void UPlanetOrbit::PlanetRotation(float DeltaTime)
 {
+	/*
+	* 행성의 자전 처리 함수
+	*/
+	
 	// 자전 각도 업데이트
 	FRotator RotationDelta(0.0f, RotationSpeed * DeltaTime, 0.0f);
 	GetOwner()->AddActorWorldRotation(RotationDelta);

@@ -8,12 +8,17 @@ struct FOrbitData
 	
 	FOrbitData()
 	{
+		// 공전
 		OrbitRadiusX = 0;
 		OrbitRadiusY = 0;
 		OrbitSpeed = 0;
 		OrbitIncline = FRotator::ZeroRotator;
+		OrbitCenter = FVector::ZeroVector;
+		
+		//자전
 		RotationSpeed = 0;
 
+		// 공전 궤도 시각화 설정 값
 		SegmentCount = 100;
 		Thickness = 50;
 	}
@@ -34,9 +39,11 @@ struct FOrbitData
 		OrbitIncline.Pitch = FMath::RandRange(-30.0f, 30.0f);
 		OrbitIncline.Roll = FMath::RandRange(-30.0f, 30.0f);
 		OrbitSpeed = FMath::RandRange(0.5f, 2.f);
+
 		RotationSpeed = FMath::RandRange(0.5f, 4.f);
 	}
-	
+
+	// 공전
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orbit")
 	float OrbitRadiusX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orbit")
@@ -46,8 +53,13 @@ struct FOrbitData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orbit")
 	FRotator OrbitIncline;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orbit")
+	FVector OrbitCenter;
+
+	// 자전
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orbit")
 	float RotationSpeed;
-	
+
+	// 공전 궤도 시각화
 	UPROPERTY(EditAnywhere, Category = "Orbit Visual")
 	int32 SegmentCount;
 	UPROPERTY(EditAnywhere, Category = "Orbit Visual")

@@ -5,7 +5,7 @@
 
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Space/Planet/GravityField.h"
+#include "Space/Planet/Physics/GravityField.h"
 
 
 // Sets default values for this component's properties

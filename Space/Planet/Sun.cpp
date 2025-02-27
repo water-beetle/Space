@@ -36,17 +36,30 @@ void ASun::Tick(float DeltaSeconds)
 	UpdateSunDirection();
 }
 
-void ASun::InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius)
+void ASun::InitSun(const FOrbitData& OrbitData, float Radius, ADirectionalLight* DirectionalLight)
 {
-	Super::InitPlanet(OrbitData, _OrbitCenter, Radius);
+	/* 태양을 생성할 때의 기본 설정 함수
+	 * 1. 부모의 InitPlanet 함수 실행
+	 * 2. Mesh의 Light Channel 설정 -> 태양을 표현하는 Directional Light가 태양에게 가리지 않도록
+	 * 3. Directional Light 저장
+	 */
+	
+	Super::InitPlanet(OrbitData, Radius);
 
 	FLightingChannels& LightChannels = PlanetMesh->LightingChannels;
 	LightChannels.bChannel0 = false;
 	PlanetMesh->MarkRenderStateDirty();
+
+	DirectionalSunLight = DirectionalLight;
 }
 
 void ASun::UpdateSunDirection()
 {
+	/* 태양빛을 처리하는 함수
+	 * 1. 플레이어와 태양의 위치를 계산해 Directional Light 방향을 업데이트
+	 * 2. Material에서 태양 빛 반사 처리를 할 수 있도록 MPCInstance의 SunDirection에 값을 설정
+	 */
+	
 	if(!PlayerPawn || !DirectionalSunLight)
 		return;
 	

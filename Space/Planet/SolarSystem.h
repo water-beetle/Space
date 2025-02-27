@@ -12,19 +12,7 @@ class UPlanetNoiseData;
 class ADirectionalLight;
 class APlanet;
 class ASun;
-
-USTRUCT()
-struct FPlanetData
-{
-	GENERATED_BODY()
-
-	FOrbitData OrbitData;
-	FNoiseData NoiseData;
-	float Radius;
-	
-	UPROPERTY()
-	APlanet* Planet;
-};
+class ASpaceCharacter;
 
 UCLASS()
 class SPACE_API ASolarSystem : public AActor
@@ -58,42 +46,46 @@ public:
 	UPROPERTY(EditAnywhere, Category="Solar System|Sun")
 	int32 SunResolution;
 	UPROPERTY(EditAnywhere, Category="Solar System|Sun")
-	UMaterialInterface* SunMaterial;
-	UPROPERTY(EditAnywhere, Category="Solar System|Sun")
 	ADirectionalLight* DirectionalSunLight;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Solar System|Planet")
-	UPlanetNoiseData* NoiseDataAsset;
-	UPROPERTY(EditAnywhere, Category="Solar System|Planet")
-	bool bUseNewPlanetMesh;
+	UPlanetNoiseData* NoiseDataAsset; // 다양한 행성 생성을 위해 배열로 선언해야 되나..?, 일단은 하나로
 	UPROPERTY(EditAnywhere, Category="Solar System|Planet")
 	int32 PlanetMinRadius;
 	UPROPERTY(EditAnywhere, Category="Solar System|Planet")
 	int32 PlanetMaxRadius;
 	UPROPERTY(EditAnywhere, Category="Solar System|Planet")
 	int32 PlanetResolution;
-	UPROPERTY(EditAnywhere, Category = "Solar System|Planet")
-	TArray<UMaterialInterface*> PlanetMaterialArray;
+
+	UPROPERTY(EditDefaultsOnly, Category="Solar System|Generator")
+	UPlanetGenerator* PlanetGenerator;
 	
 	FString PlanetSaveDirectory = "/Game/Meshes/Planet/";
 	FString PlanetMeshName = "Planet_";
 
+	void GenerateSolarSystem();
+
 private:
-	void SetRandomPlanetData();
-	//void GeneratePlanetMesh();
 	void GenerateSun();
 	void GeneratePlanets();
+	
 	void PlaceMainCharacter();
+	void TryPlaceCharacter();
 	void SetMovePlanet();
 
-	UPlanetGenerator MeshGenerator;
-
-	ASun* Sun;
-	APawn* PlayerPawn;
+	UPROPERTY()
+	TSubclassOf<ACharacter> FunnyRobotBPClass;
+	UPROPERTY()
+	ASpaceCharacter* SpaceCharacterPlayer;
 	FNoiseData SunNoiseData;
 	FOrbitData SunOrbitData;
 
 	UPROPERTY()
-	TArray<FPlanetData> PlanetDataArray;
+	ASun* Sun;
+	UPROPERTY()
+	TArray<APlanet*> PlanetArray;
+	
+	// UPROPERTY()
+	// TArray<FPlanetData> PlanetDataArray;
 	
 };

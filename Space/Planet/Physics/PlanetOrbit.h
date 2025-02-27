@@ -19,22 +19,24 @@ public:
 	UPlanetOrbit();
 
 	UPROPERTY(EditAnywhere, Category = "Orbit")
+	UProceduralMeshComponent* OrbitMesh;
+	
+	UPROPERTY(EditAnywhere, Category = "Orbit")
 	UMaterialInterface* OrbitMaterial;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
+	virtual void OnRegister() override;
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
-	void InitOrbit(const FOrbitData& OrbitData, const FVector _OrbitCenter); // 궤도에 맞는 행성의 초기 위치 설정
-	void SetOrbitVisualization(UProceduralMeshComponent* OrbitMesh); // 궤도 시각화 초기화
+	void InitOrbit(const FOrbitData& OrbitData); // 궤도에 맞는 행성의 초기 위치 설정
 	FORCEINLINE void SetMove(bool _bMove){bMove = _bMove;}
 private:
-	void GenerateEllipseMesh(UProceduralMeshComponent* OrbitMesh); // 타원 궤도 생성
+	void GenerateEllipseMesh(); // 타원 궤도 생성
 	void PlanetRevolve(float DeltaTime); // 공전처리
 	void PlanetRotation(float DeltaTime); // 자전처리
 	FVector CalculateOrbitPointsByTheta(float Theta, float RadiusX, float RadiusY) const;

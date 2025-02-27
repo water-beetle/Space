@@ -12,7 +12,8 @@ ASpaceGameMode::ASpaceGameMode()
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Blueprints/BP_FunnyRobot"));
 	if (PlayerPawnBPClass.Class != NULL)
 	{
-		DefaultPawnClass = PlayerPawnBPClass.Class;
+		//DefaultPawnClass = PlayerPawnBPClass.Class;
+		DefaultPawnClass = nullptr;
 	}
 
 	PlayerControllerClass = AGravityController::StaticClass();

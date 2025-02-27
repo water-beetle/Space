@@ -16,13 +16,6 @@ APlanet::APlanet()
 
 	PlanetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlanetMesh"));
 	RootComponent = PlanetMesh;
-
-	OrbitMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("OrbitMesh"));
-	OrbitMesh->SetupAttachment(RootComponent);
-	OrbitMesh->SetUsingAbsoluteRotation(true); // 공전 궤도를 나타내기 행성의 위치, 각도에 무관하게 적용
-	OrbitMesh->SetUsingAbsoluteLocation(true);
-	OrbitMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	OrbitMesh->CastShadow = false;
 	
 	GravityField = CreateDefaultSubobject<UGravityFieldCenter>("GravityField");
 	GravityField->SetupAttachment(RootComponent);
@@ -59,19 +52,23 @@ void APlanet::SetPlanetMaterial(UMaterialInterface* PlanetMaterial)
 	}
 }
 
+void APlanet::InitPlanet(const FOrbitData& OrbitData, float Radius)
+{
+	/* 행성을 생성할 때의 기본 설정 함수
+	 * 1. 행성의 공전, 자전 설정
+	 * 2. 행성의 중력 범위 설정
+	 * 3. 행성의 반지름값 저장
+	 */
+	
+	PlanetOrbitComponent->InitOrbit(OrbitData);
+	GravityField->SetGravityFieldSize(Radius * 2 + 200);
+	PlanetRadius = Radius;
+}
+
 void APlanet::AddCharacterToGravityField()
 {
 	GravityField->AddCharacterToGravityField();
 }
 
-void APlanet::InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius)
-{
-	PlanetOrbitComponent->InitOrbit(OrbitData, _OrbitCenter);
-	PlanetOrbitComponent->SetOrbitVisualization(OrbitMesh); // 행성의 공전궤도 설정
-
-	// 중력장 범위 설정
-	GravityField->SetGravityFieldSize(Radius * 2 + 200);
-	PlanetRadius = Radius;
-}
 
 

@@ -6,18 +6,24 @@
 #include "Space/Planet/Planet.h"
 #include "StaticMeshAttributes.h"
 #include "AssetRegistry/AssetRegistryModule.h"
-#include "Kismet2/KismetEditorUtilities.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/World.h"
+#include "HAL/FileManager.h"
+#include "Misc/PackageName.h"
 #include "PhysicsEngine/BodySetup.h"
+#include "Space/Planet/Sun.h"
 #include "UObject/SavePackage.h"
+#include "RenderingThread.h"
 
 
 struct FNoiseData;
 
 UPlanetGenerator::UPlanetGenerator()
 {
+	PlanetMaterialArray = TArray<UMaterialInterface*>();
 }
 
-APlanet* UPlanetGenerator::GeneratePlanet(FString PlanetName, int32 Resolution, float Radius, const FNoiseData& NoiseData)
+APlanet* UPlanetGenerator::GeneratePlanet(const FString& PlanetName, int32 Resolution, float Radius, const FNoiseData& NoiseData, bool IsSun)
 {
 	/*
 	 * 행성을 생성하는 함수
@@ -27,28 +33,47 @@ APlanet* UPlanetGenerator::GeneratePlanet(FString PlanetName, int32 Resolution, 
 	 */
 
 	// 1. 행성의 Static Mesh 생성
-	UStaticMesh* GeneratedPlanetMesh = GeneratePlanetMesh(PlanetPackagePath, PlanetName, Resolution, Radius, NoiseData);
+	UStaticMesh* GeneratedPlanetMesh = GeneratePlanetMesh(PlanetName, Resolution, Radius, NoiseData);
 
 	// 2. 행성의 Procedural Foliage 생성
 
 	// 3. APlanet 생성 후 Static Mesh, Procedural Foliage 적용
-	APlanet* GeneratedPlanet = GetWorld()->SpawnActor<APlanet>(APlanet::StaticClass(), FVector::Zero(), FRotator::ZeroRotator);
+	APlanet* GeneratedPlanet;
+	if(IsSun)
+	{
+		GeneratedPlanet = Cast<APlanet>(GetWorld()->SpawnActor<ASun>(ASun::StaticClass(), FVector::Zero(), FRotator::ZeroRotator));
+		if(SunMaterial)
+		{
+			GeneratedPlanet->SetPlanetMaterial(SunMaterial);
+		}
+	}
+	else
+	{
+		GeneratedPlanet = GetWorld()->SpawnActor<APlanet>(APlanet::StaticClass(), FVector::Zero(), FRotator::ZeroRotator);
+		if(PlanetMaterialArray.Num() > 0)
+		{
+			int32 RandomIndex = FMath::RandRange(0, PlanetMaterialArray.Num() - 1);
+			GeneratedPlanet->SetPlanetMaterial(PlanetMaterialArray[RandomIndex]);
+		}
+	}
+	GeneratedPlanet->SetPlanetMesh(GeneratedPlanetMesh);
 	
 	return GeneratedPlanet;
-	
 }
 
-UStaticMesh* UPlanetGenerator::GeneratePlanetMesh(const FString& PackagePath, const FString& MeshName,
+UStaticMesh* UPlanetGenerator::GeneratePlanetMesh(const FString& MeshName,
                                                  int32 Resolution, float Radius, const FNoiseData& NoiseData)
 {
-	FString PlanetMeshFilePath = FPackageName::LongPackageNameToFilename(PackagePath + MeshName,
+	FString PlanetMeshFilePath = FPackageName::LongPackageNameToFilename(PlanetPackagePath + MeshName,
 		FPackageName::GetAssetPackageExtension());
 
 	// 이미 입력받은 MeshName으로 생성된 Mesh가 있다면 해당 Mesh를 반환
 	if(IFileManager::Get().FileExists(*PlanetMeshFilePath))
 	{
+		FString AssetPath = PlanetPackagePath + MeshName + TEXT(".") + MeshName;
+		
 		UStaticMesh* ExistingPlanetMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(),
-			nullptr, *PlanetMeshFilePath));
+			nullptr, *AssetPath));
 		
 		if (ExistingPlanetMesh)
 		{
@@ -70,7 +95,7 @@ UStaticMesh* UPlanetGenerator::GeneratePlanetMesh(const FString& PackagePath, co
 	FMeshDescription MeshDescription;
 	FillMeshDescription(MeshDescription, Vertices, Triangles, UVs, Normals);
 	
-	return CreateStaticMeshAsset(PackagePath, MeshName, MeshDescription);	
+	return CreateStaticMeshAsset(MeshName, MeshDescription);	
 }
 
 void UPlanetGenerator::GenerateMeshData(int32 Resolution, float Radius, TArray<FVector3f>& Vertices,
@@ -214,44 +239,64 @@ void UPlanetGenerator::FillMeshDescription(FMeshDescription& MeshDescription, co
 	UE_LOG(LogTemp, Log, TEXT("Vertices: %d, Triangles: %d"), Vertices.Num(), Triangles.Num() / 3);
 }
 
-UStaticMesh* UPlanetGenerator::CreateStaticMeshAsset(const FString& PackagePath, const FString& MeshName,
+UStaticMesh* UPlanetGenerator::CreateStaticMeshAsset(const FString& MeshName,
 	const FMeshDescription& MeshDescription)
 {	
-	UPackage* Package = CreatePackage(*PackagePath);
+	UPackage* Package = CreatePackage(*PlanetPackagePath);
 	Package->FullyLoad();
 	UStaticMesh* StaticMesh = NewObject<UStaticMesh>(Package, *MeshName, RF_Public | RF_Standalone);
 
-	FStaticMeshSourceModel& SourceModel = StaticMesh->AddSourceModel();
-	SourceModel.BuildSettings.bRecomputeNormals = true;
-	SourceModel.BuildSettings.bRecomputeTangents = true;
+	// LOD 개수 설정 (LOD 0, LOD 1, LOD 2 총 3개)
+	StaticMesh->SetNumSourceModels(3);
+
+	// LOD 0 설정 (풀 디테일)
+	FStaticMeshSourceModel& LOD0 = StaticMesh->GetSourceModel(0);
+	LOD0.BuildSettings.bRecomputeNormals = true;
+	LOD0.BuildSettings.bRecomputeTangents = true;
+	LOD0.ReductionSettings.PercentTriangles = 1.0f;  // 풀 디테일 유지
+
+	// LOD 1 설정 (중간 디테일)
+	FStaticMeshSourceModel& LOD1 = StaticMesh->GetSourceModel(1);
+	LOD1.BuildSettings.bRecomputeNormals = true;
+	LOD1.BuildSettings.bRecomputeTangents = true;
+	LOD1.ReductionSettings.PercentTriangles = 0.5f;  // 50% 삼각형 유지
+
+	// LOD 2 설정 (저폴리곤)
+	FStaticMeshSourceModel& LOD2 = StaticMesh->GetSourceModel(2);
+	LOD2.BuildSettings.bRecomputeNormals = true;
+	LOD2.BuildSettings.bRecomputeTangents = true;
+	LOD2.ReductionSettings.PercentTriangles = 0.2f;  // 20% 삼각형 유지
 
 	StaticMesh->GetStaticMaterials().Add(FStaticMaterial());  // 기본 재질 추가
 
-	// 2. MeshDescription 적용 및 커밋
+	// MeshDescription 적용
 	StaticMesh->CreateMeshDescription(0, MeshDescription);
-	StaticMesh->SetNumSourceModels(1);
-	StaticMesh->SetLightingGuid(FGuid::NewGuid());  // 조명에 필요한 GUID 생성
-	
-	// **충돌 관련 설정**
-	StaticMesh->bGenerateMeshDistanceField = true;                // 거리 필드 생성
-	StaticMesh->bHasNavigationData = true;                        // 내비게이션 관련 데이터 포함
+	StaticMesh->SetLightingGuid(FGuid::NewGuid());  
+
+	// Lightmap Resolution 설정
+	StaticMesh->LightMapResolution = 512; 
+
+	// 충돌 및 거리 필드 설정
+	StaticMesh->bGenerateMeshDistanceField = false;
+	StaticMesh->bHasNavigationData = true;
 	StaticMesh->CreateBodySetup();
 	UBodySetup* BodySetup = StaticMesh->GetBodySetup();
 	if (BodySetup)
 	{
-		BodySetup->CollisionTraceFlag = CTF_UseComplexAsSimple;  // 복잡 충돌 사용
-		BodySetup->CreatePhysicsMeshes();                        // 물리 충돌 데이터 생성
+		BodySetup->CollisionTraceFlag = CTF_UseComplexAsSimple;
+		BodySetup->CreatePhysicsMeshes();
 	}
 	
 	StaticMesh->CommitMeshDescription(0);
 	
-	StaticMesh->Build(false);
+	StaticMesh->Build(true);
+	FlushRenderingCommands();
 	StaticMesh->PostEditChange();
 
 	Package->MarkPackageDirty();
 	FAssetRegistryModule::AssetCreated(StaticMesh);
 	
-	const FString FullPath = FPackageName::LongPackageNameToFilename(PackagePath + MeshName, FPackageName::GetAssetPackageExtension());
+	const FString FullPath = FPackageName::LongPackageNameToFilename(PlanetPackagePath + MeshName, FPackageName::GetAssetPackageExtension());
 	FSavePackageArgs SaveArgs;
 	SaveArgs.TopLevelFlags = RF_Public | RF_Standalone;
 	

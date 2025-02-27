@@ -30,9 +30,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lighting")
 	ADirectionalLight* DirectionalSunLight;
 
-	virtual void InitPlanet(const FOrbitData& OrbitData, const FVector _OrbitCenter, float Radius) override;
+	void InitSun(const FOrbitData& OrbitData, float Radius, ADirectionalLight* DirectionalLight);
 	
-	FORCEINLINE void SetDiretionalLight(ADirectionalLight* DirectionalLight){DirectionalSunLight = DirectionalLight;}
 private:
 	APawn* PlayerPawn;
 	UMaterialParameterCollectionInstance* MPCInstance;
